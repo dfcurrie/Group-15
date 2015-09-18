@@ -10,6 +10,7 @@ public class Main {
 	    		
 	    	} else if (args[0].equals("-f") && args[2].equals("-o")) {
 	    		System.out.println("Input: " + args[1] + "\nOutput: " + args[3]);
+	    		Airplane airplane = new Airplane(0, 0, 0, 0, 0, 0);
 	    		
 	    	} else {
 	    		System.out.println("Invalid command line arguments\nProper usage: -f <input_file_name> -o <output_file_name>");

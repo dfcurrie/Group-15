@@ -13,4 +13,52 @@ public class Airplane {
 		this.unloadTime = unloadTime;
 	}
 
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
+	}
+
+	public int getFuel() {
+		return fuel;
+	}
+
+	public void setFuel(int fuel) {
+		this.fuel = fuel;
+	}
+
+	public int getBurnRate() {
+		return burnRate;
+	}
+
+	public void setBurnRate(int burnRate) {
+		this.burnRate = burnRate;
+	}
+
+	public int getLandTime() {
+		return landTime;
+	}
+
+	public void setLandTime(int landTime) {
+		this.landTime = landTime;
+	}
+
+	public int getTaxiTime() {
+		return taxiTime;
+	}
+
+	public void setTaxiTime(int taxiTime) {
+		this.taxiTime = taxiTime;
+	}
+
+	public int getUnloadTime() {
+		return unloadTime;
+	}
+
+	public void setUnloadTime(int unloadTime) {
+		this.unloadTime = unloadTime;
+	}
+
 }
