@@ -60,5 +60,17 @@ public class Airplane {
 	public void setUnloadTime(int unloadTime) {
 		this.unloadTime = unloadTime;
 	}
+	
+	@Override
+	public String toString() {
+		String toString = null;
+		
+		toString = new String(ID + ", " + fuel +  ", " + burnRate + ", " + landTime + ", " + taxiTime + ", " + unloadTime);
+		
+		
+		return toString;
+		
+		
+	}
 
 }
