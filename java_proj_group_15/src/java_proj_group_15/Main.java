@@ -36,10 +36,9 @@ public class Main {
     public static ArrayList<Airplane> parseInput() {	// Returns an array of Airplane objects created from the input file   	
     	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     	String curLine = null;
-    	ArrayList<Airplane> airplanes = new ArrayList();
+    	ArrayList<Airplane> airplanes = new ArrayList<Airplane>();
     	int curTuple = 0;
     	int ID = 0, fuel = 0, burnRate = 0, landTime = 0, taxiTime = 0, unloadTime = 0;
-    	int curPlane = 0;
     
     	try {
 			while ((curLine = reader.readLine()) != null) {
@@ -77,7 +76,6 @@ public class Main {
 				    	airplanes.add(new Airplane(ID, fuel, burnRate, landTime, taxiTime, unloadTime));	
 				    	System.out.println("New Airplane created: " + ID + fuel + burnRate + landTime + taxiTime + unloadTime);
 						curTuple = 0;
-						curPlane++;
 						break;
 					}
 				}
