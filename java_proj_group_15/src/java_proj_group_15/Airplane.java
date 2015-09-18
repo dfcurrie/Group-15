@@ -65,7 +65,7 @@ public class Airplane {
 	public String toString() {
 		String toString = null;
 		
-		toString = new String(ID + ", " + fuel +  ", " + burnRate + ", " + landTime + ", " + taxiTime + ", " + unloadTime);
+		toString = new String("ID: " + ID + ", " + fuel +  ", " + burnRate + ", " + landTime + ", " + taxiTime + ", " + unloadTime);
 		
 		
 		return toString;
