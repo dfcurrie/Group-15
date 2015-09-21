@@ -12,10 +12,12 @@ public class Reader {
 	public Reader(String fileName) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(fileName));
+
 			String runInput, parkInput, timeInput;
 			
 			runInput = br.readLine();
 			runInput = runInput.substring(2, runInput.length());
+
 			parkInput = br.readLine();
 			parkInput = parkInput.substring(2, parkInput.length());
 			timeInput = br.readLine();
@@ -45,5 +47,4 @@ public class Reader {
 	}
 }
 	
-	
-	
+
