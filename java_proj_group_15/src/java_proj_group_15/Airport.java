@@ -2,26 +2,24 @@ package java_proj_group_15;
 
 public class Airport {
 
-	private int runways, parkings;
+	private Runway[] runways;
+	private Parking[] parkings;
 	
-	public Airport(int runways, int parkings) {
-		this.runways = runways;
-		this.parkings = parkings;
+	public Airport(int numRunways, int numParkings) {
+		for (int i = 0; i < numRunways; i++) {
+			runways[i] = new Runway();
+		}
+		for (int i = 0; i < numParkings; i++) {
+			parkings[i] = new Parking();
+		}
 	}
 
 	public int getRunways() {
-		return runways;
+		return runways.length;
 	}
 
-	public void setRunways(int runways) {
-		this.runways = runways;
-	}
 
 	public int getParkings() {
-		return parkings;
-	}
-
-	public void setParkings(int parkings) {
-		this.parkings = parkings;
+		return parkings.length;
 	}
 }
