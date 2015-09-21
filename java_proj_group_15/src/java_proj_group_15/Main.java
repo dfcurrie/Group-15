@@ -29,22 +29,21 @@ public class Main {
 	}
 
 	public static void run(String fileName) {
-		// Read from data file
-		// Create airport and time
 
-		Reader reader = new Reader(System.getProperty("user.dir") + "\\"
+
+
+		Reader reader = new Reader(System.getProperty("user.dir") + "\\"		// Read from data file
 				+ fileName);
 		//System.out.println(reader.toString());
 		Airport airport = new Airport(reader.getNumRunInput(), reader
-				.getNumParkInput());
-
-		Timer timer = new Timer();
+				.getNumParkInput());											// Create airport
+		Timer timer = new Timer();												// Create timer to update simulation at set interval
 		timer.schedule(new Time(), 0, reader.getTimeInput() * 1000); // Update in-simulation time every few seconds as specified
 
-		Input input = new Input(); // Start airplane input thread which loads planes
-		input.start(); // into the Input.airplanes list for calculations
-						// based on standard input
-						// Calculate landing scenarios based on current time
-						// Print output to screen and file
+		Input input = new Input();  // Start airplane input thread which loads planes
+		input.start(); 				// into the Input.airplanes list for calculations
+									// based on standard input
+		// Calculate landing scenarios based on current time
+		// Print output to screen and file
 	}
 }

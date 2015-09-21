@@ -16,11 +16,19 @@ public class Airport {
 		}
 	}
 
-	public int getRunways() {
+	public int getNumRunways() {
 		return runways.size();
 	}
 
-	public int getParkings() {
+	public int getNumParkings() {
 		return parkings.size();
+	}
+	
+	public ArrayList<Runway> getRunways() {
+		return runways;
+	}
+	
+	public ArrayList<Parking> getParkings() {
+		return parkings;
 	}
 }
