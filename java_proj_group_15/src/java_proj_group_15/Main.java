@@ -1,9 +1,6 @@
 package java_proj_group_15;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.Timer;
 
 public class Main {
 
@@ -33,12 +30,15 @@ public class Main {
 	
 	public static void run() {
 		// Read from data file
-		
-		Input input = new Input();  // Start airplane input thread which loads planes
-		input.start();				// into the Input.airplanes list for calculations
-									// based on standard input
-		
-		// Calculate landing scenarios
+		// Create airport and time
+		Input input = new Input();  			// Start airplane input thread which loads planes
+		input.start();							// into the Input.airplanes list for calculations
+												// based on standard input
+		// Get time from file
+		int time = 1000;
+		Timer timer = new Timer();
+		timer.schedule(new Time(), 0, time);	// Update in-simulation time every few seconds as specified
+		// Calculate landing scenarios based on current time
 		// Print output to screen and file
 	}
 }

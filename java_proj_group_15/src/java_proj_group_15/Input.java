@@ -1,6 +1,7 @@
 package java_proj_group_15;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class Input extends Thread{
 					case 4:
 						unloadTime = Integer.parseInt(curLine);
 						System.out.println("Unload Time: " + unloadTime);
-						System.out.println("Press enter to create new plane");
+						System.out.println("\nPress enter to create new plane");
 						curTuple++;
 						break;
 					case 5:
