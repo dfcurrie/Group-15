@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Input extends Thread{
 
-	ArrayList<Airplane> airplanes; 
+	private ArrayList<Airplane> airplanes; 
 	
 	@Override
 	public void run() {

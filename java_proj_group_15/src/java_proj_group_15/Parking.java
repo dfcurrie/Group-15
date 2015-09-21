@@ -12,5 +12,4 @@ public class Parking {
 		this.isOccupied = isOccupied;
 	}
 
-
 }

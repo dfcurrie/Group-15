@@ -12,5 +12,4 @@ public class Runway {
 		this.isOccupied = isOccupied;
 	}
 
-
 }

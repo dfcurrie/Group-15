@@ -1,25 +1,26 @@
 package java_proj_group_15;
 
+import java.util.ArrayList;
+
 public class Airport {
 
-	private Runway[] runways;
-	private Parking[] parkings;
-	
+	private ArrayList<Runway> runways;
+	private ArrayList<Parking> parkings;
+
 	public Airport(int numRunways, int numParkings) {
 		for (int i = 0; i < numRunways; i++) {
-			runways[i] = new Runway();
+			//runways.add(new Runway());
 		}
 		for (int i = 0; i < numParkings; i++) {
-			parkings[i] = new Parking();
+			//parkings.add(new Parking());
 		}
 	}
 
 	public int getRunways() {
-		return runways.length;
+		return runways.size();
 	}
 
-
 	public int getParkings() {
-		return parkings.length;
+		return parkings.size();
 	}
 }
