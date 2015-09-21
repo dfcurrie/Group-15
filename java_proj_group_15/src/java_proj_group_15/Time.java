@@ -15,4 +15,7 @@ public class Time extends TimerTask {
 		return curTime;
 	}
 
+	public void setCurTime(int curTime) {
+		this.curTime = curTime;
+	}
 }
