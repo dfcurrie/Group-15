@@ -31,13 +31,13 @@ public class Main {
 		// Read from data file
 		// Create airport and time
 
-		Reader reader = new Reader(fileName);
-		Airport airport = new Airport(Integer.parseInt(reader.getNumRunInput()), Integer.parseInt(reader.getNumParkInput()));
+		Reader reader = new Reader(System.getProperty("user.dir")+ "\\" + fileName);
+		Airport airport = new Airport(reader.getNumRunInput(), reader.getNumParkInput());
 		Input input = new Input();  			// Start airplane input thread which loads planes
 		input.start();							// into the Input.airplanes list for calculations
 												// based on standard input
 		Timer timer = new Timer();
-		timer.schedule(new Time(), 0, Integer.parseInt(reader.getTimeInput())*1000);	// Update in-simulation time every few seconds as specified
+		timer.schedule(new Time(), 0, reader.getTimeInput()*1000);	// Update in-simulation time every few seconds as specified
 		// Calculate landing scenarios based on current time
 		// Print output to screen and file
 	}
