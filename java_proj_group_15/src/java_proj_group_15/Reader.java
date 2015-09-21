@@ -7,16 +7,24 @@ import java.io.FileNotFoundException;
 
 public class Reader {
 	
-	private String numRunInput, numParkInput, numTimeInput;
+	private int numRunInput, numParkInput, numTimeInput;
 	
 	public Reader(String fileName) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String runInput, parkInput, timeInput;
+			
+			runInput = br.readLine();
+			runInput = runInput.substring(2, runInput.length());
+			parkInput = br.readLine();
+			parkInput = parkInput.substring(2, parkInput.length());
+			timeInput = br.readLine();
+			timeInput = timeInput.substring(2, timeInput.length());
 		
-			String numRunInput = br.readLine();
-			String numParInput = br.readLine();
-			String numTimeInput = br.readLine();
-		
+			numRunInput = Integer.parseInt(runInput);
+			numParkInput = Integer.parseInt(parkInput);
+			numTimeInput = Integer.parseInt(timeInput);
+			
 		} catch (IOException e) {
 			System.out.println(e);
 		//} catch (FileNotFoundException e) {
@@ -24,15 +32,15 @@ public class Reader {
 		}
 	}
 	
-	public String getNumRunInput(){
+	public int getNumRunInput(){
 		return numRunInput;
 	}
 	
-	public String getNumParkInput(){
+	public int getNumParkInput(){
 		return numParkInput;
 	}
 	
-	public String getTimeInput() {
+	public int getTimeInput() {
 		return numTimeInput;
 	}
 }
