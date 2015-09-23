@@ -4,8 +4,7 @@ public class Airplane {
 
 	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime;
 
-	public Airplane(int ID, int fuel, int burnRate, int landTime, int taxiTime,
-			int unloadTime) {
+	public Airplane(int ID, int fuel, int burnRate, int landTime, int taxiTime, int unloadTime) {
 		this.ID = ID;
 		this.fuel = fuel;
 		this.burnRate = burnRate;
@@ -66,8 +65,8 @@ public class Airplane {
 	public String toString() {
 		String toString = null;
 
-		toString = new String("ID: " + ID + ", " + fuel + ", " + burnRate + ", "
-				+ landTime + ", " + taxiTime + ", " + unloadTime);
+		toString = new String(
+				"ID: " + ID + ", " + fuel + ", " + burnRate + ", " + landTime + ", " + taxiTime + ", " + unloadTime);
 
 		return toString;
 	}

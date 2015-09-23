@@ -28,8 +28,8 @@ public class Reader {
 
 		} catch (IOException e) {
 			System.out.println(e);
-			//} catch (FileNotFoundException e) {
-			//	System.out.println(e);	
+			// } catch (FileNotFoundException e) {
+			// System.out.println(e);
 		}
 	}
 
@@ -47,8 +47,7 @@ public class Reader {
 
 	@Override
 	public String toString() {
-		String toString = numRunInput + ", " + numParkInput + ", "
-				+ numTimeInput;
+		String toString = numRunInput + ", " + numParkInput + ", " + numTimeInput;
 		return toString;
 	}
 }
