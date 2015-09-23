@@ -9,13 +9,14 @@ import java.util.ArrayList;
 public class Input extends Thread {
 
 	private ArrayList<Airplane> airplanes;
-
-	int numOfPlanes = 0;
-
-	public int numOfPlanes() {
-		return numOfPlanes;
+	private Time timeTracker;
+	private Airport airport;
+	
+	public Input(Time timeTracker, Airport airport) {
+		this.timeTracker = timeTracker;
+		this.airport = airport;
 	}
-
+	
 	@Override
 	public void run() {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -67,7 +68,16 @@ public class Input extends Thread {
 						airplanes.add(new Airplane(ID, fuel, burnRate, landTime, taxiTime, unloadTime));
 						System.out.println(
 								"New Airplane created: " + ID + fuel + burnRate + landTime + taxiTime + unloadTime);
-						numOfPlanes = numOfPlanes + 1;
+						
+						// End of scenario, check if can land here
+						if (airport.canLand(getAirplanes(), timeTracker.getCurTime()) == true) { // Calculate landing scenarios based on current time
+							// Print output to screen and file with airplane information for input.getAirplanes()
+							System.out.println("Can land all planes");
+						} else {
+							// Print impossible and exit
+							System.out.println("Can not land all planes");
+						}
+						
 						System.out.println(
 								"Enter CASE <caseNumber> to create a new plane or END to stop creating new planes");
 						break;
