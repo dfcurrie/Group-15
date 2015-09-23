@@ -69,12 +69,15 @@ public class Input extends Thread {
 						System.out.println(
 								"New Airplane created: " + ID + fuel + burnRate + landTime + taxiTime + unloadTime);
 						// End of scenario, check if can land here
+						Output output = new Output(getAirplanes());
 						if (airport.canLand(getAirplanes(), timeTracker.getCurTime()) == true) { // Calculate landing scenarios based on current time
 							// Print output to screen and file with airplane information for input.getAirplanes()
 							System.out.println("Can land all planes");
+							output.runPossible();
 						} else {
 							// Print impossible and exit
 							System.out.println("Can not land all planes");
+							output.runImpossible();
 						}
 						
 						System.out.println(
