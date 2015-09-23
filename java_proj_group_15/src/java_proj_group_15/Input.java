@@ -35,7 +35,7 @@ public class Input extends Thread {
 					caseID = Integer.parseInt(curLine.substring(5));
 					System.out.println("CASE ID: " + caseID);
 					timeTracker.resetTime(); // Time starts at 0 when Case is entered
-					clearAirplanes();
+					airplanes.clear();
 
 				} else if (curLine.isEmpty()) {
 					// End of scenario, check if can land here
@@ -85,15 +85,10 @@ public class Input extends Thread {
 		}
 
 		System.out.println(airplanes);
-
+		System.exit(1);
 	}
 
 	public ArrayList<Airplane> getAirplanes() {
 		return airplanes;
 	}
-	
-	public void clearAirplanes() {
-		airplanes.clear();
-	}
-
 }
