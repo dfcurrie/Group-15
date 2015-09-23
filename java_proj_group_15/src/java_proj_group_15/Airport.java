@@ -46,7 +46,10 @@ public class Airport {
 			if (curPlane.getFuel() < 1) { // Check all cases where a plane could not land i.e. has no fuel
 				return false;
 			}
-			
+			else {
+				while (tryLand(curPlane) == false) {
+				}
+			}
 		}
 		
 //		if (airplanes.size() > getNumRunways()) {
@@ -58,5 +61,33 @@ public class Airport {
 //		} 
 		
 		return true;
+	}
+	
+	public boolean tryLand(Airplane curPLane) {
+		boolean successLand = false;
+		Iterator<Runway> runIterator = runways.iterator();
+		Iterator<Parking> parkIterator = parkings.iterator();
+		Runway curRunway = null;
+		Parking curPark = null;
+		Runway clrRunway = null;
+		
+		while (runIterator.hasNext()) {			//checks if free runway
+			curRunway = runIterator.next();
+			if (curRunway.isOccupied() == false) {
+				clrRunway = curRunway;		//keeps track of free runway
+			}
+		}
+		while (parkIterator.hasNext() && clrRunway != null) {	//checks if free parking
+			curPark = parkIterator.next();
+			if (curPark.isOccupied() == false) {
+				clrRunway.setOccupied(true);	//occupies runway if can land
+				successLand = true;
+			}
+		}
+		//increase time
+		//update runways
+		//update parking
+		return successLand;			//varuable used to check whether have to get 
+							//new airplane to check
 	}
 }
