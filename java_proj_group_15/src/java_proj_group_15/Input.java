@@ -31,6 +31,7 @@ public class Input extends Thread {
 					curLine = curLine.substring(0, curLine.length());
 					ID = Integer.parseInt(curLine.substring(5));
 					System.out.println("ID: " + ID);
+					timeTracker.resetTime();					// Time starts at 0 when Case is entered
 				} else if (curLine.equals("END")) {
 					break;
 				} else {

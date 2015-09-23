@@ -5,10 +5,11 @@ import java.util.TimerTask;
 public class Time extends TimerTask {
 
 	private int curTime = 0;
+	private boolean run = false;
 
 	@Override
 	public void run() {
-		// System.out.println(curTime++);
+		//System.out.println(curTime++);
 		curTime++;
 	}
 
@@ -18,5 +19,9 @@ public class Time extends TimerTask {
 
 	public void setCurTime(int curTime) {
 		this.curTime = curTime;
+	}
+
+	public void resetTime() {
+		curTime = 0;
 	}
 }
