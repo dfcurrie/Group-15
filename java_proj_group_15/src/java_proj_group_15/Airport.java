@@ -45,10 +45,14 @@ public class Airport {
 			curPlane = iterator.next();
 			if (curPlane.getFuel() < 1) { // Check all cases where a plane could not land i.e. has no fuel
 				return false;
-			} else {
-				//while (tryLand(curPlane) == false) {
 			}
+			if (tryLand(curPlane) == false){
+				return false;
+			}
+			//			else {
+			//while (tryLand(curPlane) == false) {
 		}
+		//			}
 		//}
 
 		//		if (airplanes.size() > getNumRunways()) {
