@@ -43,26 +43,10 @@ public class Airport {
 
 		while (iterator.hasNext()) { // Check every plane in the airplanes list
 			curPlane = iterator.next();
-			if (curPlane.getFuel() < 1) { // Check all cases where a plane could not land i.e. has no fuel
-				return false;
-			}
 			if (tryLand(curPlane) == false){
 				return false;
 			}
-			//			else {
-			//while (tryLand(curPlane) == false) {
 		}
-		//			}
-		//}
-
-		//		if (airplanes.size() > getNumRunways()) {
-		//			System.out.println("Too few runways for all planes");
-		//			return false;
-		//		} else if (airplanes.size() > getNumParkings()) {
-		//			System.out.println("Too few parking spots");
-		//			return false;
-		//		} 
-
 		return true;
 	}
 
