@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.io.File;
 
+/*
+This Class outputs the result of the scenario into the provided
+outfile. 
+*/
 public class Output {
 	private ArrayList<Airplane> airplanes;
 	File file = new File("outputFile");
@@ -13,6 +17,7 @@ public class Output {
 		this.airplanes = airplanes;
 	}
 
+	//Output the result if the scenario was successful
 	public void runPossible(int caseID, Time timeTracker) {
 		Airplane airplane = airplanes.get(0);
 		String toFileP = "CASE " + caseID + ": POSSIBLE\n";
@@ -29,6 +34,7 @@ public class Output {
 		}
 	}
 
+	//Output the result if the scenario was unsuccessful
 	public void runImpossible(int caseID) {
 		Airplane airplane = airplanes.get(0);
 		String toFileI = "CASE " + caseID + ": IMPOSSIBLE\n\n";
@@ -41,7 +47,5 @@ public class Output {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
-
 }
