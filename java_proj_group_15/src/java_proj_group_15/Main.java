@@ -4,6 +4,9 @@ import java.util.Timer;
 
 public class Main {
 
+	public static String outputFile;
+	public static String inputFile;
+	
 	public static void main(String[] args) {
 		try {
 			//Print a description of what the program does if java Main -h is run
@@ -14,7 +17,9 @@ public class Main {
 			//Run the program on a file containg variables of state
 			} else if (args[0].equals("-f") && args[2].equals("-o")) {
 				System.out.println("Input: " + args[1] + "\nOutput: " + args[3]);
-				run(args[1]);
+				inputFile = args[1];
+				outputFile = args[3];
+				run();
 				
 			//Print error message if invalid inputs given
 			} else {
@@ -33,10 +38,10 @@ public class Main {
 
 	//Function that runs the program by creating the reader to get read a file
 	// and creating the time thread and starting accepting user input
-	public static void run(String fileName) {
+	public static void run() {
 		//Read from input file to create so called "airport state" and prints variables contained
 		Reader reader = new Reader(System.getProperty("user.dir") + "\\"		
-				+ fileName);
+				+ inputFile);
 		System.out.println(reader.toString());
 		
 		//Create airport based on numbers from input file

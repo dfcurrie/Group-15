@@ -76,7 +76,7 @@ public class Airplane {
 		if (isRunning) {
 		curFuel = fuel - ((timeTracker.getCurTime() - arrivalTime)
 				* burnRate);
-		System.out.println(getID() + " " + curFuel);
+		//System.out.println(getID() + " " + curFuel);
 		}
 
 		return curFuel;

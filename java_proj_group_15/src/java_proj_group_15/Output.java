@@ -11,7 +11,7 @@ outfile.
 */
 public class Output {
 	private ArrayList<Airplane> airplanes;
-	File file = new File("outputFile");
+	File file = new File(Main.outputFile);
 
 	public Output(ArrayList<Airplane> airplanes) {
 		this.airplanes = airplanes;

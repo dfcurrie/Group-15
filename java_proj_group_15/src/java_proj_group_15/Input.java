@@ -30,7 +30,7 @@ public class Input extends Thread {
 	//	CASE #: 	<enter>
 	//	(#,#,#,#,#,#) 	<enter>
 	//	...		<enter>
-	//			<enter>
+	//	END		<enter>
 	@Override
 	public void run() {
 		//Create reader object to read user input
@@ -55,6 +55,7 @@ public class Input extends Thread {
 					System.out.println("CASE ID: " + caseID);
 					timeTracker.resetTime(); // Time starts at 0 when Case is entered
 					airplanes.clear();
+					
 
 				//Start scenario if enter is pressed with no input
 				//  creates an output
@@ -72,6 +73,7 @@ public class Input extends Thread {
 						System.out.println("Can not land all planes");
 						output.runImpossible(caseID);
 					}
+					
 					
 		//Add Comment here			
 				} else if (curLine.startsWith("END")) {
