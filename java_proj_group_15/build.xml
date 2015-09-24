@@ -1,0 +1,9 @@
+<project default="compile">
+	<target name="clean">
+		<delete dir="build" />
+	</target>
+	<target name="compile">
+		<mkdir dir="bin" />
+		<javac srcdir="src\java_proj_group_15" destdir="bin" />
+	</target>
+</project>
