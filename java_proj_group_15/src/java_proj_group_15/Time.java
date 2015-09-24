@@ -11,7 +11,7 @@ public class Time extends TimerTask {
 		//System.out.println(curTime++);
 		curTime++;
 	}
-
+	
 	public int getCurTime() {
 		return curTime;
 	}

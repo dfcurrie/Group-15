@@ -33,7 +33,7 @@ public class Airport {
 		return parkings;
 	}
 
-	public boolean canLand(ArrayList<Airplane> airplanes, int curTime) { // Checks all airplanes from airplane array and if one is unable to land, return false, else return true
+	public boolean canLand(ArrayList<Airplane> airplanes, Time timeTracker) { // Checks all airplanes from airplane array and if one is unable to land, return false, else return true
 		if (airplanes == null) {
 			return false;
 		}
@@ -43,38 +43,29 @@ public class Airport {
 
 		while (iterator.hasNext()) { // Check every plane in the airplanes list
 			curPlane = iterator.next();
-			if (tryLand(curPlane) == false){
+
+			do {
+				if (checkPlaneFuel(airplanes, timeTracker) == false) {
+					return false;
+				}
+			} while (curPlane.tryLand(timeTracker, this) == false);
+		}
+		return true;
+	}
+
+	public boolean checkPlaneFuel(ArrayList<Airplane> airplanes,
+			Time timeTracker) {
+		if (airplanes == null)
+			return true;
+
+		Iterator<Airplane> iterator = airplanes.iterator();
+		while (iterator.hasNext()) {
+			Airplane curPlane = iterator.next();
+			if (curPlane.calcFuel(timeTracker) <= 0 && curPlane.isRunning()) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public boolean tryLand(Airplane curPLane) {
-		boolean successLand = false;
-		Iterator<Runway> runIterator = runways.iterator();
-		Iterator<Parking> parkIterator = parkings.iterator();
-		Runway curRunway = null;
-		Parking curPark = null;
-		Runway clrRunway = null;
-
-		while (runIterator.hasNext()) { //checks if free runway
-			curRunway = runIterator.next();
-			if (curRunway.isOccupied() == false) {
-				clrRunway = curRunway; //keeps track of free runway
-			}
-		}
-		while (parkIterator.hasNext() && clrRunway != null) { //checks if free parking
-			curPark = parkIterator.next();
-			if (curPark.isOccupied() == false) {
-				clrRunway.setOccupied(true); //occupies runway if can land
-				successLand = true;
-			}
-		}
-		//increase time
-		//update runways
-		//update parking
-		return successLand; //varuable used to check whether have to get 
-		//new airplane to check
-	}
 }

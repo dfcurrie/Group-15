@@ -40,6 +40,8 @@ public class Main {
 		input.start(); 				// into the Input.airplanes list for calculations
 									// based on standard input
 		
+
+
 		
 		//System.exit(1);
 	}

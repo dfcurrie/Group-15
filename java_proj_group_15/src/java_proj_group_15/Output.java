@@ -13,10 +13,10 @@ public class Output {
 		this.airplanes = airplanes;
 	}
 
-	public void runPossible() {
+	public void runPossible(int caseID, Time timeTracker) {
 		Airplane airplane = airplanes.get(0);
-		String toFileP = "CASE " + airplane.getID() + ": POSSIBLE\n";
-		toFileP = toFileP + airplane.getID() + " LANDED AT " + airplane.getLandTime() + " WITH " + airplane.getFuel()
+		String toFileP = "CASE " + caseID + ": POSSIBLE\n";
+		toFileP = toFileP + airplane.getID() + " LANDED AT " + airplane.getLandTime() + " WITH " + airplane.calcFuel(timeTracker)
 				+ " REMAINING.\n\n";
 
 		FileWriter fw;
@@ -25,14 +25,13 @@ public class Output {
 			fw.write(toFileP);
 			fw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public void runImpossible() {
+	public void runImpossible(int caseID) {
 		Airplane airplane = airplanes.get(0);
-		String toFileI = "CASE " + airplane.getID() + ": IMPOSSIBLE\n\n";
+		String toFileI = "CASE " + caseID + ": IMPOSSIBLE\n\n";
 
 		FileWriter fw;
 		try {
@@ -40,7 +39,6 @@ public class Output {
 			fw.write(toFileI);
 			fw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

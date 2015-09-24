@@ -31,7 +31,7 @@ public class Input extends Thread {
 		try {
 			while ((curLine = reader.readLine()) != "END") {
 				if (curLine.startsWith("CASE")) {
-					curLine = curLine.substring(0, curLine.length());
+					curLine = curLine.substring(0, curLine.length()-1);
 					caseID = Integer.parseInt(curLine.substring(5));
 					System.out.println("CASE ID: " + caseID);
 					timeTracker.resetTime(); // Time starts at 0 when Case is entered
@@ -41,15 +41,14 @@ public class Input extends Thread {
 					// End of scenario, check if can land here
 					Output output = new Output(getAirplanes());
 
-					if (airport.canLand(getAirplanes(), timeTracker
-							.getCurTime()) == true) { // Calculate landing scenarios based on current time
+					if (airport.canLand(getAirplanes(), timeTracker) == true) { // Calculate landing scenarios based on current time
 						// Print output to screen and file with airplane information for input.getAirplanes()
 						System.out.println("Can land all planes");
-						output.runPossible();
+						output.runPossible(caseID, timeTracker);
 					} else {
 						// Print impossible and exit
 						System.out.println("Can not land all planes");
-						output.runImpossible();
+						output.runImpossible(caseID);
 					}
 				} else if (curLine.startsWith("END")) {
 					break;
@@ -68,7 +67,7 @@ public class Input extends Thread {
 					unloadTime = Integer.parseInt(planeInfo.get(5));
 
 					airplanes.add(new Airplane(ID, fuel, burnRate, landTime,
-							taxiTime, unloadTime));
+							taxiTime, unloadTime, timeTracker.getCurTime()));
 					System.out.println("New Airplane created: " + ID + fuel
 							+ burnRate + landTime + taxiTime + unloadTime);
 
