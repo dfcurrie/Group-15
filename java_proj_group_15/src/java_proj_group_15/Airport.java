@@ -68,27 +68,29 @@ public class Airport {
 
 		while (iterator.hasNext()) { // Check every plane in the airplanes list
 			curPlane = iterator.next();
-			int travelTime;
-			travelTime = timeTracker.getCurTime() - curPlane
-					.getRunwayStartTime();
+			if (curPlane.getRunway() != null) {
 
-			if (travelTime >= curPlane.getLandTime() + curPlane.getTaxiTime()
-					+ curPlane.getUnloadTime()) {
-				curPlane.setEndTime(timeTracker.getCurTime());
-				curPlane.getParking().setOccupied(false);
-				curPlane.setHasFinished(true);
+				int travelTime;
+				travelTime = timeTracker.getCurTime() - curPlane
+						.getRunwayStartTime();
 
-			} else if (travelTime >= curPlane.getLandTime() + curPlane
-					.getTaxiTime()) {
-				curPlane.setRunning(false);
-				curPlane.getParking().setOccupied(true);
+				if (travelTime >= curPlane.getLandTime() + curPlane
+						.getTaxiTime() + curPlane.getUnloadTime()) {
+					curPlane.setEndTime(timeTracker.getCurTime());
+					curPlane.getParking().setOccupied(false);
+					curPlane.setHasFinished(true);
 
-			} else if (travelTime >= curPlane.getLandTime()) {
+				} else if (travelTime >= curPlane.getLandTime() + curPlane
+						.getTaxiTime()) {
+					curPlane.setRunning(false);
+					curPlane.getParking().setOccupied(true);
 
-				curPlane.getRunway().setOccupied(false);
+				} else if (travelTime >= curPlane.getLandTime()) {
 
+					curPlane.getRunway().setOccupied(false);
+
+				}
 			}
-
 		}
 	}
 
@@ -114,8 +116,8 @@ public class Airport {
 		while (iterator.hasNext()) {
 			Airplane curPlane = iterator.next();
 			if (curPlane.calcFuel(timeTracker) < 0 && curPlane.isRunning()) {
-				System.out.println("No Fuel" + curPlane.calcFuel(timeTracker));
-				return false;
+				System.out.println("No Fuel " + curPlane.calcFuel(timeTracker));
+				return false; 
 			}
 		}
 		return true;
