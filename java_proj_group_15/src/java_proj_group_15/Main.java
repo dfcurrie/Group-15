@@ -24,6 +24,7 @@ public class Main {
 					"Invalid command line arguments\nProper usage: -f <input_file_name> -o <output_file_name>");
 			System.exit(-1);
 		}
+		
 	}
 
 	public static void run(String fileName) {

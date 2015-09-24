@@ -4,9 +4,10 @@ import java.util.Iterator;
 
 public class Airplane {
 
-	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime;
-	private boolean hasLanded = false, isRunning = true;
-	private String status = "flight";
+	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime, runwayStartTime, endTime;
+	private boolean hasFinished = false, isRunning = true;
+	private Runway runway = null;
+	private Parking parking = null;
 
 	public Airplane(int ID, int fuel, int burnRate, int landTime, int taxiTime,
 			int unloadTime, int arrivalTime) {
@@ -19,7 +20,7 @@ public class Airplane {
 		this.arrivalTime = arrivalTime;
 	}
 
-	public boolean tryLand(Time timeTracker, Airport airport) {
+	public void tryLand(Time timeTracker, Airport airport) {
 		boolean successLand = false;
 		Iterator<Runway> runIterator = airport.getRunways().iterator();
 		Iterator<Parking> parkIterator = airport.getParkings().iterator();
@@ -35,39 +36,37 @@ public class Airplane {
 		while (runIterator.hasNext()) { //checks if free runway
 			curRunway = runIterator.next();
 			if (curRunway.isOccupied() == false) {
-				clrRunway = curRunway; //keeps track of free runway
+				//				clrRunway = curRunway; //keeps track of free runway
+				while (parkIterator.hasNext()) { //checks if free parking
+					curPark = parkIterator.next();
+					if (curPark.isReserved(groundTime, bookingTime) == false) {
+						runway = curRunway;
+						parking = curPark;
+						curRunway.setOccupied(true); //occupies runway if can land
+						successLand = true;
+						System.out.println("WE MADE IT TO LINE 46");
+						runwayStartTime = timeTracker.getCurTime();
+						curPark.setReserved(groundTime, bookingTime);
+					}
+				}
 			}
 		}
 
-		while (parkIterator.hasNext() && clrRunway != null) { //checks if free parking
-			curPark = parkIterator.next();
-			if (curPark.isReserved(groundTime, unloadTime) == false) {
-				clrRunway.setOccupied(true); //occupies runway if can land
-				successLand = true;
-				int runwayStartTime = timeTracker.getCurTime();
-				curPark.setReserved(groundTime, bookingTime);
-				setStatus("runway");
-			}
-		}
-		
 		//update parking
-		return successLand; //varuable used to check whether have to get 
+		//System.out.println(successLand);
+		//return successLand; //varuable used to check whether have to get 
 		//new airplane to check
 	}
 
 	public int calcFuel(Time timeTracker) {
-		int curFuel = fuel - ((timeTracker.getCurTime() - arrivalTime)
+		int curFuel = 0;
+		if (isRunning) {
+		curFuel = fuel - ((timeTracker.getCurTime() - arrivalTime)
 				* burnRate);
+		//System.out.println(curFuel);
+		}
 
 		return curFuel;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
 	}
 
 	public int getID() {
@@ -118,12 +117,12 @@ public class Airplane {
 		this.unloadTime = unloadTime;
 	}
 
-	public boolean hasLanded() {
-		return hasLanded;
+	public boolean hasFinished() {
+		return hasFinished;
 	}
 
-	public void setHasLanded(boolean hasLanded) {
-		this.hasLanded = hasLanded;
+	public void setHasFinished(boolean hasFinished) {
+		this.hasFinished = hasFinished;
 	}
 
 	public boolean isRunning() {
@@ -132,6 +131,38 @@ public class Airplane {
 
 	public void setRunning(boolean isRunning) {
 		this.isRunning = isRunning;
+	}
+
+	public int getRunwayStartTime() {
+		return runwayStartTime;
+	}
+
+	public void setRunwayStartTime(int runwayStartTime) {
+		this.runwayStartTime = runwayStartTime;
+	}
+
+	public Runway getRunway() {
+		return runway;
+	}
+
+	public void setRunway(Runway runway) {
+		this.runway = runway;
+	}
+
+	public Parking getParking() {
+		return parking;
+	}
+
+	public void setParking(Parking parking) {
+		this.parking = parking;
+	}
+
+	public int getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(int endTime) {
+		this.endTime = endTime;
 	}
 
 	@Override

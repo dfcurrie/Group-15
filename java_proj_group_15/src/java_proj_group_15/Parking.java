@@ -10,12 +10,12 @@ public class Parking {
 	List<Integer> bookings = new ArrayList<Integer>();
 
 	public boolean isReserved(int startTime, int endTime) {
-		for (int i = startTime; i < endTime; i++)
+		for (int i = startTime; i <= endTime; i++)
 			if (bookings.contains(i)) {
-				return false;
+				return true;
 			}
 		
-		return true;
+		return false;
 
 	}
 

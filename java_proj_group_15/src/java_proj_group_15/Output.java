@@ -16,7 +16,7 @@ public class Output {
 	public void runPossible(int caseID, Time timeTracker) {
 		Airplane airplane = airplanes.get(0);
 		String toFileP = "CASE " + caseID + ": POSSIBLE\n";
-		toFileP = toFileP + airplane.getID() + " LANDED AT " + airplane.getLandTime() + " WITH " + airplane.calcFuel(timeTracker)
+		toFileP = toFileP + airplane.getID() + " LANDED AT " + airplane.getEndTime() + " WITH " + airplane.calcFuel(timeTracker)
 				+ " REMAINING.\n\n";
 
 		FileWriter fw;
