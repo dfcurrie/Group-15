@@ -77,6 +77,7 @@ public class Airport {
 					curPlane.setEndTime(timeTracker.getCurTime());
 					curPlane.getParking().setOccupied(false);
 					curPlane.setHasFinished(true);
+					System.out.println(curPlane.getID() + ": Clear Parking -> Unload(Complete) | Fuel: " + curPlane.getCurFuel());
 
 				//Case where plane has been on gorund long enough to get to parking
 				//Set parking to occupied
@@ -84,11 +85,13 @@ public class Airport {
 						.getTaxiTime()) {
 					curPlane.setRunning(false);
 					curPlane.getParking().setOccupied(true);
+					System.out.println(curPlane.getID() + ": Clear Taxi -> Parking | Fuel: " + curPlane.getCurFuel());
 
 				//Case where plane has been on ground long enough to clear runway
 				//Set runway to Unoccupied
 				} else if (travelTime >= curPlane.getLandTime()) {
 					curPlane.getRunway().setOccupied(false);
+					System.out.println(curPlane.getID() + ": Clear Runway -> Taxi | Fuel: " + curPlane.getCurFuel());
 				}
 			}
 		}
@@ -120,7 +123,7 @@ public class Airport {
 		while (iterator.hasNext()) {
 			Airplane curPlane = iterator.next();
 			if (curPlane.calcFuel(timeTracker) < 0 && curPlane.isRunning()) {
-				System.out.println("No Fuel " + curPlane.calcFuel(timeTracker));
+				System.out.println("No Fuel: " + curPlane.getID());
 				return false; 
 			}
 		}

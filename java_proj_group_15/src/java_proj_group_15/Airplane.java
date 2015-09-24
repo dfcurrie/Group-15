@@ -8,7 +8,7 @@ This Class acts as the airplane and checks if it can land itself on the runway
 
 public class Airplane {
 
-	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime, runwayStartTime, endTime;
+	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime, runwayStartTime, endTime, curFuel = fuel;
 	private boolean hasFinished = false, isRunning = true;
 	private Runway runway = null;
 	private Parking parking = null;
@@ -72,7 +72,6 @@ public class Airplane {
 	//Calculate how much fuel left in plane based on ow much time plane has been "active" for
 	//Only needs to check if fuel needs to be consumed (not in parking)
 	public int calcFuel(Time timeTracker) {
-		int curFuel = 0;
 		if (isRunning) {
 		curFuel = fuel - ((timeTracker.getCurTime() - arrivalTime)
 				* burnRate);
@@ -180,6 +179,14 @@ public class Airplane {
 
 	public void setEndTime(int endTime) {
 		this.endTime = endTime;
+	}
+
+	public int getCurFuel() {
+		return curFuel;
+	}
+
+	public void setCurFuel(int curFuel) {
+		this.curFuel = curFuel;
 	}
 
 	//Override toString to more efficiently display an airplane object

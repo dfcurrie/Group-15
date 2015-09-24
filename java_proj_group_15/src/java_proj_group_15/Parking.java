@@ -10,16 +10,16 @@ This Class acts as the parking for airplanes
 public class Parking {
 
 	private boolean isOccupied = false;
-	
+
 	List<Integer> bookings = new ArrayList<Integer>();
 
 	//Check if plane will be able to go into parking for provided time
 	public boolean isReserved(int startTime, int endTime) {
-		for (int i = startTime; i <= endTime; i++)
-			if (bookings.contains(i)) {
-				return true;
-			}
-		
+
+		if (bookings.contains(startTime)) {
+			return true;
+		}
+
 		return false;
 	}
 
