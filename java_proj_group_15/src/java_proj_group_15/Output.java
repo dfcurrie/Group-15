@@ -3,6 +3,7 @@ package java_proj_group_15;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.io.File;
 
 /*
@@ -23,11 +24,15 @@ public class Output {
 
 	//Output the result if the scenario was successful
 	public void runPossible(int caseID, Time timeTracker) {
-		Airplane airplane = airplanes.get(0);
 		String toFileP = "CASE " + caseID + ": POSSIBLE\n";
-		toFileP = toFileP + airplane.getID() + " LANDED AT " + airplane.getEndTime() + " WITH " + airplane.calcFuel(timeTracker)
-				+ " REMAINING.\n\n";
-
+		Airplane curPlane = null;
+		Iterator<Airplane> iterator = airplanes.iterator();
+		while (iterator.hasNext()) {
+			curPlane = iterator.next();
+			toFileP = toFileP + curPlane.getID() + " LANDED AT " + curPlane.getEndTime() + " WITH " + curPlane.calcFuel(timeTracker)
+			+ " REMAINING.\n";
+		}
+		toFileP = toFileP + "\n";
 		FileWriter fw;
 		try {
 			fw = new FileWriter(file, true);
@@ -40,7 +45,6 @@ public class Output {
 
 	//Output the result if the scenario was unsuccessful
 	public void runImpossible(int caseID) {
-		Airplane airplane = airplanes.get(0);
 		String toFileI = "CASE " + caseID + ": IMPOSSIBLE\n\n";
 
 		FileWriter fw;

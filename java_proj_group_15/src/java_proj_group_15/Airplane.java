@@ -10,10 +10,11 @@ public class Airplane {
 
 	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime,
 			runwayStartTime, endTime, curFuel = fuel, caseID;
-	private boolean hasFinished = false, isRunning = true, hasLanded = false;
+	private boolean hasFinished = false, isRunning = true, hasLanded = false, head = false, printed = false;
 	private Runway runway = null;
 	private Parking parking = null;
 	private Time timeTracker;
+	private String planeLoc;
 
 	//Create an airplane based on what Input got from the user
 	public Airplane(int ID, int fuel, int burnRate, int landTime, int taxiTime,
@@ -32,53 +33,88 @@ public class Airplane {
 	//Attempt to land on a runway.
 	//Look to see if there is an open runway and parking spot in the future
 	public boolean tryLand(Time timeTracker, Airport airport) {
-		boolean successLand = false;
-		if (!hasFinished && calcFuel(timeTracker) > calcNeededFuel()) {
+		Boolean successLand = false;
+		if (!hasFinished && calcFuel(timeTracker) >= calcNeededFuel()) {
+			if (!hasLanded) { // If plane is in the air
+				int groundTime = getLandTime() + getTaxiTime() + timeTracker
+						.getCurTime();
+				int unloadTime = getUnloadTime();
+				int bookingTime = unloadTime + groundTime;
 
-			Iterator<Runway> runIterator = airport.getRunways().iterator();
-			Iterator<Parking> parkIterator = airport.getParkings().iterator();
-			Runway curRunway = null;
-			Parking curPark = null;
-			//System.out.println("Trying to land");
-			//Variable for: 	time when moving on ground
-			//			time to unload airplane
-			//			time when airplane requires parking
-			int groundTime = getLandTime() + getTaxiTime() + timeTracker
-					.getCurTime();
-			int unloadTime = getUnloadTime();
-			int bookingTime = unloadTime + groundTime;
+				Iterator<Runway> runIterator = airport.getRunways().iterator();
+				Iterator<Parking> parkIterator = airport.getParkings()
+						.iterator();
+				Runway curRunway = null;
+				Parking curPark = null;
 
-			//Iterate through list of runways to see if there is a free runway
-			while (runIterator.hasNext()) {
-				curRunway = runIterator.next();
-				//Case when there is a free runway
-				if (curRunway.isOccupied() == false) {
-					//Iterate through list of parking to see if there will be free parking
-					while (parkIterator.hasNext()) {
-						curPark = parkIterator.next();
-
-						//Case when there is free runway and parking (can land)
-
-						//Update which runway airplane is using and which parking
-						//Set the runway to occupied, make note of curTime and make reservation to parking
-						//Let know that next plane can attempt landing
-						if (curPark.isReserved(groundTime) == false) {
-							runway = curRunway;
-							parking = curPark;
-							// Put plane on runway
-							runwayStartTime = timeTracker.getCurTime();
-							curRunway.setOccupied(true);
-							curPark.setReserved(groundTime, bookingTime);
-							hasLanded = true;
-							break;
+				while (runIterator.hasNext()) {
+					curRunway = runIterator.next();
+					if (!curRunway.isOccupied()) {
+						while (parkIterator.hasNext()) {
+							curPark = parkIterator.next();
+							if (!curPark.isReserved(groundTime)) {
+								curRunway.setOccupied(true);
+								curPark.setReserved(groundTime, bookingTime);
+								hasLanded = true;
+								parking = curPark;
+								runway = curRunway;
+								runwayStartTime = timeTracker.getCurTime();
+								successLand = true;
+								break;
+							}
 						}
+						break;
 					}
-					break;
 				}
+
 			}
 
 		}
+		if (hasLanded) {
+			planeLoc = getPlaneLoc();
+		}
 		return successLand;
+
+		//		if (!hasFinished && calcFuel(timeTracker) > calcNeededFuel()) {
+		//
+
+		//			//System.out.println("Trying to land");
+		//			//Variable for: 	time when moving on ground
+		//			//			time to unload airplane
+		//			//			time when airplane requires parking
+
+		//
+		//			//Iterate through list of runways to see if there is a free runway
+		//			while (runIterator.hasNext()) {
+		//				curRunway = runIterator.next();
+		//				//Case when there is a free runway
+		//				if (curRunway.isOccupied() == false) {
+		//					//Iterate through list of parking to see if there will be free parking
+		//					while (parkIterator.hasNext()) {
+		//						curPark = parkIterator.next();
+		//
+		//						//Case when there is free runway and parking (can land)
+		//
+		//						//Update which runway airplane is using and which parking
+		//						//Set the runway to occupied, make note of curTime and make reservation to parking
+		//						//Let know that next plane can attempt landing
+		//						if (curPark.isReserved(groundTime) == false) {
+		//							runway = curRunway;
+		//							parking = curPark;
+		//							// Put plane on runway
+		//							runwayStartTime = timeTracker.getCurTime();
+		//							curRunway.setOccupied(true);
+		//							curPark.setReserved(groundTime, bookingTime);
+		//							hasLanded = true;
+		//							System.out.println("Landed");
+		//							break;
+		//						}
+		//					}
+		//					break;
+		//				}
+		//			}
+		//
+		//		}
 	}
 
 	//Calculate how much fuel left in plane based on how much time plane has been "active" for
@@ -99,23 +135,22 @@ public class Airplane {
 		return neededFuel;
 	}
 
-//	public boolean checkFuel(Airplane airplane) {
-//		boolean enoughFuel = false;
-//		int selfFuel = (landTime + taxiTime) * burnRate;
-//		int waitFuel = //check the total time from all planes before 
-//		int totalFuel = selfFuel + waitFuel;
-//		
-//		if (fuel >= totalFuel) {
-//			enoughFuel = true;
-//		}
-//		return enoughFuel;
-//	}
+	//	public boolean checkFuel(Airplane airplane) {
+	//		boolean enoughFuel = false;
+	//		int selfFuel = (landTime + taxiTime) * burnRate;
+	//		int waitFuel = //check the total time from all planes before 
+	//		int totalFuel = selfFuel + waitFuel;
+	//		
+	//		if (fuel >= totalFuel) {
+	//			enoughFuel = true;
+	//		}
+	//		return enoughFuel;
+	//	}
 
 	//	private void trackPlanes(ArrayList<Airplane> airplanes, Time timeTracker) {
 	public String getPlaneLoc() {
 		//Determine how long airplane has been on ground
 		int travelTime = timeTracker.getCurTime() - getRunwayStartTime();
-
 		//Case where plane has been on ground long enough to finish
 		//runway, taki, and unloading. Set hasFinished to true and remove plane from parking
 		if (travelTime >= getLandTime() + getTaxiTime() + getUnloadTime()) {
@@ -123,25 +158,26 @@ public class Airplane {
 			getParking().setOccupied(false);
 			setHasFinished(true);
 			System.out.println(getID()
-					+ ": Clear Parking -> Unload(Complete) | Fuel: "
-					+ getCurFuel());
+					+ ": Clear Parking -> Unload(Complete) | Fuel: " + calcFuel(
+							timeTracker));
+			setEndTime(timeTracker.getCurTime());
 			return "Finished";
 
 			//Case where plane has been on gorund long enough to get to parking
 			//Set parking to occupied
 		} else if (travelTime >= getLandTime() + getTaxiTime()) {
 			setRunning(false);
+			getRunway().setOccupied(false);
 			getParking().setOccupied(true);
-			System.out.println(getID() + ": Clear Taxi -> Parking | Fuel: "
-					+ getCurFuel());
+//			System.out.println(getID() + ": Clear Taxi -> Parking | Fuel: "
+//					+ calcFuel(timeTracker));
 			return "Parking";
 
 			//Case where plane has been on ground long enough to clear runway
 			//Set runway to Unoccupied
 		} else if (travelTime >= getLandTime()) {
-			getRunway().setOccupied(false);
-			System.out.println(getID() + ": Clear Runway -> Taxi | Fuel: "
-					+ getCurFuel());
+//			System.out.println(getID() + ": Clear Airspace -> Runway | Fuel: "
+//					+ calcFuel(timeTracker));
 			return "Runway";
 		} else {
 			return null;
@@ -269,6 +305,22 @@ public class Airplane {
 
 	public void setCaseID(int caseID) {
 		this.caseID = caseID;
+	}
+
+	public boolean isHead() {
+		return head;
+	}
+
+	public void setHead(boolean head) {
+		this.head = head;
+	}
+
+	public boolean isPrinted() {
+		return printed;
+	}
+
+	public void setPrinted(boolean printed) {
+		this.printed = printed;
 	}
 
 	//Override toString to more efficiently display an airplane object

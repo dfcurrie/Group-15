@@ -72,52 +72,63 @@ public class Main {
 		// Start airplane input thread which loads planes into the
 		// Input.airplanes
 		// list for calculations based on standard input
-		BlockingQueue<ArrayList<Airplane>> queue = new ArrayBlockingQueue<>(10);
+		BlockingQueue<Airplane> queue = new ArrayBlockingQueue<>(10);
 		Input input = new Input(timeTracker, queue);
 		input.start();
 
-		ArrayList<Airplane> airplanes = null;
-		boolean allPlanesFinished = false;
-		
-		while (!input.isEndScenario()) {
-			try {
-				airplanes = queue.take();
-				System.out.println(airplanes.toString());
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			Iterator<Airplane> iterator = airplanes.iterator();
+		ArrayList<Airplane> airplanes = new ArrayList<Airplane>();
+
+		while (!input.isKillScenario()) {
+			boolean allPlanesFinished = false;
 			Airplane curPlane = null;
+			airplanes.clear();
+			while (!input.isEndScenario()) {
+				while (airplanes.isEmpty()) {
+					Airplane plane = null;
+					plane = queue.poll();
+					if (plane != null) {
+						airplanes.add(plane);
+						System.out.println(airplanes.toString());
+					}
+				}
 
-			while (iterator.hasNext()) { // Try and land all current planes
-				curPlane = iterator.next();
-				curPlane.tryLand(timeTracker, airport);
-				System.out.println("Attempting Land");
-			}
+				Iterator<Airplane> iterator = airplanes.iterator();
 
-			Iterator<Airplane> iterator2 = airplanes.iterator();
-			allPlanesFinished = true;
-			while (iterator2.hasNext()) { // Check all planes to see if they were successful
-				curPlane = iterator2.next();
-				if (!curPlane.hasFinished()) {
-					allPlanesFinished = false;
+				while (iterator.hasNext()) {
+					curPlane = iterator.next();
+					if (!curPlane.hasFinished()) {
+						if (curPlane.tryLand(timeTracker, airport)) {
+							if (iterator.hasNext()) {
+								curPlane = iterator.next();
+								curPlane.setHead(true);
+							}
+						}
+					}
+				}
+
+				Iterator<Airplane> iterator2 = airplanes.iterator();
+				allPlanesFinished = true;
+				while (iterator2.hasNext()) { // Check all planes to see if they were successful
+					curPlane = iterator2.next();
+					if (!curPlane.hasFinished()) {
+						allPlanesFinished = false;
+					} else if (curPlane.hasFinished() && !curPlane
+							.isPrinted()) {
+						curPlane.setPrinted(true);
+
+					}
 				}
 			}
 
-		}
-
-		Output output = new Output(airplanes);
-		//System.out.println(airplanes);
-		if (allPlanesFinished) {
-			//Print output to screen and to outfile with airplane information for airplanes
-			System.out.println("Can land all planes");
-			output.runPossible(airplanes.get(0).getCaseID(), timeTracker);
-		} else if (!allPlanesFinished) {
-			//Print impossible and exit
-			System.out.println("Can not land all planes");
-			output.runImpossible(airplanes.get(0).getCaseID());
-
-			// System.exit(1);
+			//System.out.println(airplanes);
+			Output output = new Output(airplanes);
+			if (allPlanesFinished) {
+				output.runPossible(curPlane.getCaseID(), timeTracker);
+				input.setEndScenario(false);
+			} else if (!allPlanesFinished) {
+				output.runImpossible(curPlane.getCaseID());
+				input.setEndScenario(false);
+			}
 		}
 	}
 }

@@ -22,16 +22,17 @@ public class Input extends Thread {
 	private Time timeTracker;
 	private int caseID = 0;
 	private boolean endScenario = false;
-	private BlockingQueue<ArrayList<Airplane>> queue;
+	private boolean killScenario = false;
+	private BlockingQueue<Airplane> queue;
 
 	//Constructor for Input
-	public Input(Time timeTracker, BlockingQueue<ArrayList<Airplane>> queue) {
+	public Input(Time timeTracker, BlockingQueue<Airplane> queue) {
 		this.timeTracker = timeTracker;
 		this.queue = queue;
 	}
 
 	//Run program to get Input from the user which should be in format:
-	//	CASE #: 	<enter>
+	//	CASE #: 	<enter>`
 	//	(#,#,#,#,#,#) 	<enter>
 	//	...		<enter>
 	//	END		<enter>
@@ -74,6 +75,7 @@ public class Input extends Thread {
 					endScenario = true;
 
 				} else if (curLine.startsWith("END")) {
+					killScenario = true;
 					break;
 
 					//Create airplane based on user input in format
@@ -95,8 +97,8 @@ public class Input extends Thread {
 					//Create the airplane with the paramaters
 					Airplane plane = new Airplane(ID, fuel, burnRate, landTime,
 							taxiTime, unloadTime, caseID, timeTracker);
-					airplanes.add(plane);
-					queue.put(airplanes);
+//					airplanes.add(plane);
+					queue.put(plane);
 					//System.out.println(airplanes);
 					//Print confirmation message of airplane creation
 					//					System.out.println("New Airplane created: " + ID + fuel
@@ -110,6 +112,7 @@ public class Input extends Thread {
 			e.printStackTrace();
 		}
 		System.out.println(airplanes);
+		System.exit(1);
 	}
 
 	//Accessor method to get ArrayList of all created airplanes
@@ -131,6 +134,14 @@ public class Input extends Thread {
 
 	public void setEndScenario(boolean endScenario) {
 		this.endScenario = endScenario;
+	}
+
+	public boolean isKillScenario() {
+		return killScenario;
+	}
+
+	public void setKillScenario(boolean killScenario) {
+		this.killScenario = killScenario;
 	}
 
 }
