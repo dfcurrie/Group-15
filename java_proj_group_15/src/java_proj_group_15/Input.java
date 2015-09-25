@@ -72,7 +72,16 @@ public class Input extends Thread {
 
 					//Calculate landing scenarios based on current time
 					//if (airport.canLand(getAirplanes(), timeTracker) == true) {
-					if (true) {
+					Iterator<Airplane> iterator = airplanes.iterator();
+					Airplane curPlane = null;
+					boolean allPlanesFinished = true;
+					while(iterator.hasNext()) {
+						curPlane = iterator.next();
+						if (!curPlane.hasFinished()) {
+							allPlanesFinished = false;
+						}
+					}
+					if (allPlanesFinished) {
 						//Print output to screen and to outfile with airplane information for input.getAirplanes()
 						System.out.println("Can land all planes");
 						output.runPossible(caseID, timeTracker);
