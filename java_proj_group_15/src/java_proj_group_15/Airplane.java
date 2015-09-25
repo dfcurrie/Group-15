@@ -65,10 +65,10 @@ public class Airplane {
 						if (curPark.isReserved(groundTime) == false) {
 							runway = curRunway;
 							parking = curPark;
-							curRunway.setOccupied(true);
+							// Put plane on runway
 							runwayStartTime = timeTracker.getCurTime();
+							curRunway.setOccupied(true);
 							curPark.setReserved(groundTime, bookingTime);
-							successLand = true;
 							hasLanded = true;
 							break;
 						}
@@ -81,7 +81,7 @@ public class Airplane {
 		return successLand;
 	}
 
-	//Calculate how much fuel left in plane based on ow much time plane has been "active" for
+	//Calculate how much fuel left in plane based on how much time plane has been "active" for
 	//Only needs to check if fuel needs to be consumed (not in parking)
 	public int calcFuel(Time timeTracker) {
 		if (isRunning) {
