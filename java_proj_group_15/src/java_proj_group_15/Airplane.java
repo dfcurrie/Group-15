@@ -8,12 +8,13 @@ This Class acts as the airplane and checks if it can land itself on the runway
 
 public class Airplane {
 
-	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime, runwayStartTime, endTime, curFuel = fuel;
+	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime,
+			runwayStartTime, endTime, curFuel = fuel;
 	private boolean hasFinished = false, isRunning = true, hasLanded = false;
 	private Runway runway = null;
 	private Parking parking = null;
 	private Time timeTracker;
-	
+
 	//Create an airplane based on what Input got from the user
 	public Airplane(int ID, int fuel, int burnRate, int landTime, int taxiTime,
 			int unloadTime, Time timeTracker) {
@@ -39,21 +40,22 @@ public class Airplane {
 		//Variable for: 	time when moving on ground
 		//			time to unload airplane
 		//			time when airplane requires parking
-		int groundTime = getLandTime() + getTaxiTime() + timeTracker.getCurTime();
+		int groundTime = getLandTime() + getTaxiTime() + timeTracker
+				.getCurTime();
 		int unloadTime = getUnloadTime();
 		int bookingTime = unloadTime + groundTime;
 
 		//Iterate through list of runways to see if there is a free runway
-		while (runIterator.hasNext()) { 
+		while (runIterator.hasNext()) {
 			curRunway = runIterator.next();
 			//Case when there is a free runway
 			if (curRunway.isOccupied() == false) {
 				//Iterate through list of parking to see if there will be free parking
-				while (parkIterator.hasNext()) { 
+				while (parkIterator.hasNext()) {
 					curPark = parkIterator.next();
-					
+
 					//Case when there is free runway and parking (can land)
-					
+
 					//Update which runway airplane is using and which parking
 					//Set the runway to occupied, make note of curTime and make reservation to parking
 					//Let know that next plane can attempt landing
@@ -78,18 +80,54 @@ public class Airplane {
 	//Only needs to check if fuel needs to be consumed (not in parking)
 	public int calcFuel(Time timeTracker) {
 		if (isRunning) {
-		curFuel = fuel - ((timeTracker.getCurTime() - arrivalTime)
-				* burnRate);
-		//System.out.println(getID() + " " + curFuel);
+			curFuel = fuel - ((timeTracker.getCurTime() - arrivalTime)
+					* burnRate);
+			//System.out.println(getID() + " " + curFuel);
 		}
 
 		return curFuel;
 	}
 
-	
-//------------------------------------------------------------------------------------------------------------
-//			ACCESSOR AND MUTATOR METHODS FOR VARIABLES IN AIRPLANE
-//------------------------------------------------------------------------------------------------------------		
+	//	private void trackPlanes(ArrayList<Airplane> airplanes, Time timeTracker) {
+	public String getPlaneLoc() {
+		//Determine how long airplane has been on ground
+		int travelTime = timeTracker.getCurTime() - getRunwayStartTime();
+
+		//Case where plane has been on ground long enough to finish
+		//runway, taki, and unloading. Set hasFinished to true and remove plane from parking
+		if (travelTime >= getLandTime() + getTaxiTime() + getUnloadTime()) {
+			setEndTime(timeTracker.getCurTime());
+			getParking().setOccupied(false);
+			setHasFinished(true);
+			System.out.println(getID()
+					+ ": Clear Parking -> Unload(Complete) | Fuel: "
+					+ getCurFuel());
+			return "Finished";
+
+			//Case where plane has been on gorund long enough to get to parking
+			//Set parking to occupied
+		} else if (travelTime >= getLandTime() + getTaxiTime()) {
+			setRunning(false);
+			getParking().setOccupied(true);
+			System.out.println(getID() + ": Clear Taxi -> Parking | Fuel: "
+					+ getCurFuel());
+			return "Parking";
+
+			//Case where plane has been on ground long enough to clear runway
+			//Set runway to Unoccupied
+		} else if (travelTime >= getLandTime()) {
+			getRunway().setOccupied(false);
+			System.out.println(getID() + ": Clear Runway -> Taxi | Fuel: "
+					+ getCurFuel());
+			return "Runway";
+		} else {
+			return null;
+		}
+	}
+
+	//------------------------------------------------------------------------------------------------------------
+	//			ACCESSOR AND MUTATOR METHODS FOR VARIABLES IN AIRPLANE
+	//------------------------------------------------------------------------------------------------------------		
 	public int getID() {
 		return ID;
 	}
