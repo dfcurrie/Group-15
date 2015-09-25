@@ -9,7 +9,7 @@ This Class acts as the airplane and checks if it can land itself on the runway
 public class Airplane {
 
 	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime, runwayStartTime, endTime, curFuel = fuel;
-	private boolean hasFinished = false, isRunning = true;
+	private boolean hasFinished = false, isRunning = true, hasLanded = false;
 	private Runway runway = null;
 	private Parking parking = null;
 
@@ -27,7 +27,7 @@ public class Airplane {
 
 	//Attempt to land on a runway.
 	//Look to see if there is an open runway and parking spot in the future
-	public void tryLand(Time timeTracker, Airport airport) {
+	public boolean tryLand(Time timeTracker, Airport airport) {
 		boolean successLand = false;
 		Iterator<Runway> runIterator = airport.getRunways().iterator();
 		Iterator<Parking> parkIterator = airport.getParkings().iterator();
@@ -56,17 +56,21 @@ public class Airplane {
 					//Update which runway airplane is using and which parking
 					//Set the runway to occupied, make note of curTime and make reservation to parking
 					//Let know that next plane can attempt landing
-					if (curPark.isReserved(groundTime, bookingTime) == false) {
+					if (curPark.isReserved(groundTime) == false) {
 						runway = curRunway;
 						parking = curPark;
 						curRunway.setOccupied(true);
 						runwayStartTime = timeTracker.getCurTime();
 						curPark.setReserved(groundTime, bookingTime);
 						successLand = true;
+						hasLanded = true;
+						break;
 					}
 				}
+				break;
 			}
 		}
+		return successLand;
 	}
 
 	//Calculate how much fuel left in plane based on ow much time plane has been "active" for
@@ -187,6 +191,14 @@ public class Airplane {
 
 	public void setCurFuel(int curFuel) {
 		this.curFuel = curFuel;
+	}
+
+	public boolean isHasLanded() {
+		return hasLanded;
+	}
+
+	public void setHasLanded(boolean hasLanded) {
+		this.hasLanded = hasLanded;
 	}
 
 	//Override toString to more efficiently display an airplane object

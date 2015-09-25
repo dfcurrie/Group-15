@@ -24,36 +24,58 @@ public class Airport {
 	}
 
 	// Checks all airplanes from airplane array and if one is unable to land, return false, else return true
-	public boolean canLand(ArrayList<Airplane> airplanes, Time timeTracker) { 
-		//		if (airplanes == null) {
-		//			return false;
-		//		}
-
+	public boolean canLand(ArrayList<Airplane> airplanes, Time timeTracker) {
 		Iterator<Airplane> iterator = airplanes.iterator();
 		Airplane curPlane = null;
 
-		//Continues to try and land, progress, and check planes' fuel to see if situation can be successful
-		//while there are still airplanes that have not finished unloading
-		//If all have, return true
-		do {
-			while (iterator.hasNext()) {
-				curPlane = iterator.next();
-				
-	//Might want to consider having tryLand return true or false so it knows whether to attempt to land further planes
-	//else situation might happen where third airplane will try to go before second.
-	//or alternatively maybe make tryLand recursive? might cause own issues
-				curPlane.tryLand(timeTracker, this);
-			}
-			//Check where planes are and move them if need be
-			trackPlanes(airplanes, timeTracker);
-			//Return false if any plane ran out of fuel (scenario did not work)
-			if (checkPlaneFuel(airplanes, timeTracker) == false) {
-				return false;
+		if (iterator.hasNext()) {
+			curPlane = iterator.next();
+			while (checkPlaneFuel(airplanes, timeTracker) && !allFinished(
+					airplanes)) {
+				if (curPlane.getRunway() == null) {
+					if (curPlane.tryLand(timeTracker, this)) {
+						if (iterator.hasNext()) {
+							curPlane = iterator.next();
+						}
+					}
+				}
+				trackPlanes(airplanes, timeTracker);
 			}
 		}
-		while (allFinished(airplanes) == false);
-		
-		return true;
+		if (allFinished(airplanes)) {
+			return true;
+		} else {
+			return false;
+		}
+		//		//		if (airplanes == null) {
+		//		//			return false;
+		//		//		}
+		//
+		//		Iterator<Airplane> iterator = airplanes.iterator();
+		//		Airplane curPlane = null;
+		//
+		//		//Continues to try and land, progress, and check planes' fuel to see if situation can be successful
+		//		//while there are still airplanes that have not finished unloading
+		//		//If all have, return true
+		//		do {
+		//			while (iterator.hasNext()) {
+		//				curPlane = iterator.next();
+		//				
+		//	//Might want to consider having tryLand return true or false so it knows whether to attempt to land further planes
+		//	//else situation might happen where third airplane will try to go before second.
+		//	//or alternatively maybe make tryLand recursive? might cause own issues
+		//				curPlane.tryLand(timeTracker, this);
+		//			}
+		//			//Check where planes are and move them if need be
+		//			trackPlanes(airplanes, timeTracker);
+		//			//Return false if any plane ran out of fuel (scenario did not work)
+		//			if (checkPlaneFuel(airplanes, timeTracker) == false) {
+		//				return false;
+		//			}
+		//		}
+		//		while (allFinished(airplanes) == false);
+		//		
+		//		return true;
 	}
 
 	//Determine if the airplaes need to be moved based on how long they've been on the ground
@@ -61,11 +83,15 @@ public class Airport {
 		Iterator<Airplane> iterator = airplanes.iterator();
 		Airplane curPlane = null;
 
+		//System.out.println(airplanes.toString());
 		//Check every plane in the airplanes list
-		while (iterator.hasNext()) { 
+		while (iterator.hasNext()) {
 			curPlane = iterator.next();
-			if (curPlane.getRunway() != null) {
+			if (curPlane.isHasLanded()) {
 
+				//			System.out.println(curPlane.getID());
+				//			System.out.println("Land Time: " + curPlane.getLandTime());
+				//			System.out.println("Start Time: " + curPlane.getRunwayStartTime());
 				//Determine how long airplane has been on ground
 				int travelTime = timeTracker.getCurTime() - curPlane
 						.getRunwayStartTime();
@@ -77,21 +103,27 @@ public class Airport {
 					curPlane.setEndTime(timeTracker.getCurTime());
 					curPlane.getParking().setOccupied(false);
 					curPlane.setHasFinished(true);
-					System.out.println(curPlane.getID() + ": Clear Parking -> Unload(Complete) | Fuel: " + curPlane.getCurFuel());
+					System.out.println(curPlane.getID()
+							+ ": Clear Parking -> Unload(Complete) | Fuel: "
+							+ curPlane.getCurFuel());
 
-				//Case where plane has been on gorund long enough to get to parking
-				//Set parking to occupied
+					//Case where plane has been on gorund long enough to get to parking
+					//Set parking to occupied
 				} else if (travelTime >= curPlane.getLandTime() + curPlane
 						.getTaxiTime()) {
 					curPlane.setRunning(false);
 					curPlane.getParking().setOccupied(true);
-					System.out.println(curPlane.getID() + ": Clear Taxi -> Parking | Fuel: " + curPlane.getCurFuel());
+					System.out.println(curPlane.getID()
+							+ ": Clear Taxi -> Parking | Fuel: " + curPlane
+									.getCurFuel());
 
-				//Case where plane has been on ground long enough to clear runway
-				//Set runway to Unoccupied
+					//Case where plane has been on ground long enough to clear runway
+					//Set runway to Unoccupied
 				} else if (travelTime >= curPlane.getLandTime()) {
 					curPlane.getRunway().setOccupied(false);
-					System.out.println(curPlane.getID() + ": Clear Runway -> Taxi | Fuel: " + curPlane.getCurFuel());
+					System.out.println(curPlane.getID()
+							+ ": Clear Runway -> Taxi | Fuel: " + curPlane
+									.getCurFuel());
 				}
 			}
 		}
@@ -103,7 +135,7 @@ public class Airport {
 		Airplane curPlane = null;
 
 		//Check every plane in the airplanes list
-		while (iterator.hasNext()) { 
+		while (iterator.hasNext()) {
 			curPlane = iterator.next();
 			if (curPlane.hasFinished() == false) {
 				return false;
@@ -113,7 +145,7 @@ public class Airport {
 	}
 
 	//Check if plane has fuel to move
-//MIGHT WANT TO CHANGE FUNCTIONS THAT USE THIS TO USE calcFuel INSTEAD
+	//MIGHT WANT TO CHANGE FUNCTIONS THAT USE THIS TO USE calcFuel INSTEAD
 	public boolean checkPlaneFuel(ArrayList<Airplane> airplanes,
 			Time timeTracker) {
 		if (airplanes == null)
@@ -124,15 +156,15 @@ public class Airport {
 			Airplane curPlane = iterator.next();
 			if (curPlane.calcFuel(timeTracker) < 0 && curPlane.isRunning()) {
 				System.out.println("No Fuel: " + curPlane.getID());
-				return false; 
+				return false;
 			}
 		}
 		return true;
 	}
-	
-//------------------------------------------------------------------------------------------------------------
-//			ACCESSOR AND MUTATOR METHODS FOR VARIABLES IN AIRPORT
-//------------------------------------------------------------------------------------------------------------	
+
+	//------------------------------------------------------------------------------------------------------------
+	//			ACCESSOR AND MUTATOR METHODS FOR VARIABLES IN AIRPORT
+	//------------------------------------------------------------------------------------------------------------	
 
 	public int getNumRunways() {
 		return runways.size();

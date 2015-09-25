@@ -14,7 +14,7 @@ public class Parking {
 	List<Integer> bookings = new ArrayList<Integer>();
 
 	//Check if plane will be able to go into parking for provided time
-	public boolean isReserved(int startTime, int endTime) {
+	public boolean isReserved(int startTime) {
 
 		if (bookings.contains(startTime)) {
 			return true;
