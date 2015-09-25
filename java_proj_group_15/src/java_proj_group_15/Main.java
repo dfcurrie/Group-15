@@ -1,6 +1,16 @@
 package java_proj_group_15;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Timer;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 public class Main {
 
@@ -18,7 +28,8 @@ public class Main {
 
 				// Run the program on a file containg variables of state
 			} else if (args[0].equals("-f") && args[2].equals("-o")) {
-				System.out.println("Input: " + args[1] + "\nOutput: " + args[3]);
+				System.out.println("Input: " + args[1] + "\nOutput: "
+						+ args[3]);
 				inputFile = args[1];
 				outputFile = args[3];
 				run();
@@ -43,11 +54,13 @@ public class Main {
 	public static void run() {
 		// Read from input file to create so called "airport state" and prints
 		// variables contained
-		Reader reader = new Reader(System.getProperty("user.dir") + "\\" + inputFile);
+		Reader reader = new Reader(System.getProperty("user.dir") + "\\"
+				+ inputFile);
 		System.out.println(reader.toString());
 
 		// Create airport based on numbers from input file
-		Airport airport = new Airport(reader.getNumRunInput(), reader.getNumParkInput());
+		Airport airport = new Airport(reader.getNumRunInput(), reader
+				.getNumParkInput());
 
 		// Create timer to update simulation at set interval
 		Timer timer = new Timer();
@@ -59,9 +72,52 @@ public class Main {
 		// Start airplane input thread which loads planes into the
 		// Input.airplanes
 		// list for calculations based on standard input
-		Input input = new Input(timeTracker, airport);
+		BlockingQueue<ArrayList<Airplane>> queue = new ArrayBlockingQueue<>(10);
+		Input input = new Input(timeTracker, queue);
 		input.start();
 
-		// System.exit(1);
+		ArrayList<Airplane> airplanes = null;
+		boolean allPlanesFinished = false;
+		
+		while (!input.isEndScenario()) {
+			try {
+				airplanes = queue.take();
+				System.out.println(airplanes.toString());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			Iterator<Airplane> iterator = airplanes.iterator();
+			Airplane curPlane = null;
+
+			while (iterator.hasNext()) { // Try and land all current planes
+				curPlane = iterator.next();
+				curPlane.tryLand(timeTracker, airport);
+				System.out.println("Attempting Land");
+			}
+
+			Iterator<Airplane> iterator2 = airplanes.iterator();
+			allPlanesFinished = true;
+			while (iterator2.hasNext()) { // Check all planes to see if they were successful
+				curPlane = iterator2.next();
+				if (!curPlane.hasFinished()) {
+					allPlanesFinished = false;
+				}
+			}
+
+		}
+
+		Output output = new Output(airplanes);
+		//System.out.println(airplanes);
+		if (allPlanesFinished) {
+			//Print output to screen and to outfile with airplane information for airplanes
+			System.out.println("Can land all planes");
+			output.runPossible(airplanes.get(0).getCaseID(), timeTracker);
+		} else if (!allPlanesFinished) {
+			//Print impossible and exit
+			System.out.println("Can not land all planes");
+			output.runImpossible(airplanes.get(0).getCaseID());
+
+			// System.exit(1);
+		}
 	}
 }

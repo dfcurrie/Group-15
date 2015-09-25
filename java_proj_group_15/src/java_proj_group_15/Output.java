@@ -16,6 +16,10 @@ public class Output {
 	public Output(ArrayList<Airplane> airplanes) {
 		this.airplanes = airplanes;
 	}
+	
+	public Output() {
+		
+	}
 
 	//Output the result if the scenario was successful
 	public void runPossible(int caseID, Time timeTracker) {
