@@ -12,17 +12,18 @@ public class Airplane {
 	private boolean hasFinished = false, isRunning = true, hasLanded = false;
 	private Runway runway = null;
 	private Parking parking = null;
-
+	private Time timeTracker;
 	//Create an airplane based on what Input got from the user
 	public Airplane(int ID, int fuel, int burnRate, int landTime, int taxiTime,
-			int unloadTime, int arrivalTime) {
+			int unloadTime, Time timeTracker) {
 		this.ID = ID;
 		this.fuel = fuel;
 		this.burnRate = burnRate;
 		this.landTime = landTime;
 		this.taxiTime = taxiTime;
 		this.unloadTime = unloadTime;
-		this.arrivalTime = arrivalTime;
+		this.arrivalTime = timeTracker.getCurTime();
+		this.timeTracker = timeTracker;
 	}
 
 	//Attempt to land on a runway.

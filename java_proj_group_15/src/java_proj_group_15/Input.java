@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /*
@@ -18,12 +19,10 @@ public class Input extends Thread {
 
 	private ArrayList<Airplane> airplanes;
 	private Time timeTracker;
-	private Airport airport;
 
 	//Constructor for Input
-	public Input(Time timeTracker, Airport airport) {
+	public Input(Time timeTracker) {
 		this.timeTracker = timeTracker;
-		this.airport = airport;
 	}
 
 	//Run program to get Input from the user which should be in format:
@@ -56,6 +55,12 @@ public class Input extends Thread {
 					timeTracker.resetTime(); // Time starts at 0 when Case is entered
 					airplanes.clear();
 					
+					Iterator<Airplane> iterator = airplanes.iterator();
+					Airplane curPlane = null;
+					while(iterator.hasNext()) {
+						curPlane = iterator.next();
+						curPlane.getParking().getBookings().clear();
+					}
 
 				//Start scenario if enter is pressed with no input
 				//  creates an output
@@ -64,7 +69,8 @@ public class Input extends Thread {
 					Output output = new Output(getAirplanes());
 
 					//Calculate landing scenarios based on current time
-					if (airport.canLand(getAirplanes(), timeTracker) == true) { 
+					//if (airport.canLand(getAirplanes(), timeTracker) == true) {
+					if (true) {
 						//Print output to screen and to outfile with airplane information for input.getAirplanes()
 						System.out.println("Can land all planes");
 						output.runPossible(caseID, timeTracker);
@@ -96,7 +102,7 @@ public class Input extends Thread {
 
 					//Create the airplane with the paramaters
 					airplanes.add(new Airplane(ID, fuel, burnRate, landTime,
-							taxiTime, unloadTime, timeTracker.getCurTime()));
+							taxiTime, unloadTime, timeTracker));
 					//Print confirmation message of airplane creation
 					System.out.println("New Airplane created: " + ID + fuel
 							+ burnRate + landTime + taxiTime + unloadTime);

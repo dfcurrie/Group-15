@@ -40,4 +40,12 @@ public class Parking {
 		this.isOccupied = isOccupied;
 	}
 
+	public List<Integer> getBookings() {
+		return bookings;
+	}
+
+	public void setBookings(List<Integer> bookings) {
+		this.bookings = bookings;
+	}
+
 }
