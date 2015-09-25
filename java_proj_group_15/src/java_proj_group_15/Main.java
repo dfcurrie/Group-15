@@ -59,7 +59,7 @@ public class Main {
 		// Start airplane input thread which loads planes into the
 		// Input.airplanes
 		// list for calculations based on standard input
-		Input input = new Input(timeTracker);
+		Input input = new Input(timeTracker, airport);
 		input.start();
 
 		// System.exit(1);

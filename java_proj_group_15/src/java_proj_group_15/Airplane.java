@@ -13,6 +13,7 @@ public class Airplane {
 	private Runway runway = null;
 	private Parking parking = null;
 	private Time timeTracker;
+	
 	//Create an airplane based on what Input got from the user
 	public Airplane(int ID, int fuel, int burnRate, int landTime, int taxiTime,
 			int unloadTime, Time timeTracker) {

@@ -19,10 +19,12 @@ public class Input extends Thread {
 
 	private ArrayList<Airplane> airplanes;
 	private Time timeTracker;
+	private Airport airport;
 
 	//Constructor for Input
-	public Input(Time timeTracker) {
+	public Input(Time timeTracker, Airport airport) {
 		this.timeTracker = timeTracker;
+		this.airport = airport;
 	}
 
 	//Run program to get Input from the user which should be in format:
@@ -101,11 +103,13 @@ public class Input extends Thread {
 					unloadTime = Integer.parseInt(planeInfo.get(5));
 
 					//Create the airplane with the paramaters
-					airplanes.add(new Airplane(ID, fuel, burnRate, landTime,
-							taxiTime, unloadTime, timeTracker));
+					Airplane plane = new Airplane(ID, fuel, burnRate, landTime,
+							taxiTime, unloadTime, timeTracker);
+					airplanes.add(plane);
 					//Print confirmation message of airplane creation
 					System.out.println("New Airplane created: " + ID + fuel
 							+ burnRate + landTime + taxiTime + unloadTime);
+					plane.tryLand(timeTracker, airport);
 				}
 			}
 		} catch (
