@@ -47,38 +47,10 @@ public class Airport {
 		} else {
 			return false;
 		}
-		//		//		if (airplanes == null) {
-		//		//			return false;
-		//		//		}
-		//
-		//		Iterator<Airplane> iterator = airplanes.iterator();
-		//		Airplane curPlane = null;
-		//
-		//		//Continues to try and land, progress, and check planes' fuel to see if situation can be successful
-		//		//while there are still airplanes that have not finished unloading
-		//		//If all have, return true
-		//		do {
-		//			while (iterator.hasNext()) {
-		//				curPlane = iterator.next();
-		//				
-		//	//Might want to consider having tryLand return true or false so it knows whether to attempt to land further planes
-		//	//else situation might happen where third airplane will try to go before second.
-		//	//or alternatively maybe make tryLand recursive? might cause own issues
-		//				curPlane.tryLand(timeTracker, this);
-		//			}
-		//			//Check where planes are and move them if need be
-		//			trackPlanes(airplanes, timeTracker);
-		//			//Return false if any plane ran out of fuel (scenario did not work)
-		//			if (checkPlaneFuel(airplanes, timeTracker) == false) {
-		//				return false;
-		//			}
-		//		}
-		//		while (allFinished(airplanes) == false);
-		//		
-		//		return true;
+
 	}
 
-	//Determine if the airplaes need to be moved based on how long they've been on the ground
+	//Determine if the airplanes need to be moved based on how long they've been on the ground
 	private void trackPlanes(ArrayList<Airplane> airplanes, Time timeTracker) {
 		Iterator<Airplane> iterator = airplanes.iterator();
 		Airplane curPlane = null;
@@ -88,10 +60,6 @@ public class Airport {
 		while (iterator.hasNext()) {
 			curPlane = iterator.next();
 			if (curPlane.isHasLanded()) {
-
-				//			System.out.println(curPlane.getID());
-				//			System.out.println("Land Time: " + curPlane.getLandTime());
-				//			System.out.println("Start Time: " + curPlane.getRunwayStartTime());
 				//Determine how long airplane has been on ground
 				int travelTime = timeTracker.getCurTime() - curPlane
 						.getRunwayStartTime();
@@ -145,7 +113,6 @@ public class Airport {
 	}
 
 	//Check if plane has fuel to move
-	//MIGHT WANT TO CHANGE FUNCTIONS THAT USE THIS TO USE calcFuel INSTEAD
 	public boolean checkPlaneFuel(ArrayList<Airplane> airplanes,
 			Time timeTracker) {
 		if (airplanes == null)

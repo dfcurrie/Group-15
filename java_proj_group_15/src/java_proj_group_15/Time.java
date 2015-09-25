@@ -8,7 +8,8 @@ public class Time extends TimerTask {
 
 	@Override
 	public void run() {
-		curTime++;
+	//System.out.println(curTime++);
+	curTime++;
 	}
 	
 	public int getCurTime() {

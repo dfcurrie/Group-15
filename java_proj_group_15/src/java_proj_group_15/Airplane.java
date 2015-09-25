@@ -33,7 +33,6 @@ public class Airplane {
 		Iterator<Parking> parkIterator = airport.getParkings().iterator();
 		Runway curRunway = null;
 		Parking curPark = null;
-		Runway clrRunway = null;
 
 		//Variable for: 	time when moving on ground
 		//			time to unload airplane
