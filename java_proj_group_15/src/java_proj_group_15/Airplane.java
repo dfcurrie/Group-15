@@ -10,7 +10,7 @@ public class Airplane {
 
 	private int ID, fuel, burnRate, landTime, taxiTime, unloadTime, arrivalTime,
 			runwayStartTime, endTime, curFuel = fuel, caseID;
-	private boolean hasFinished = false, isRunning = true, hasLanded = false, head = false, printed = false;
+	private boolean hasFinished = false, isRunning = true, hasLanded = false, head = false;
 	private Runway runway = null;
 	private Parking parking = null;
 	private Time timeTracker;
@@ -69,7 +69,7 @@ public class Airplane {
 
 			}
 
-		}
+		} 
 		if (hasLanded) {
 			planeLoc = getPlaneLoc();
 		}
@@ -313,14 +313,6 @@ public class Airplane {
 
 	public void setHead(boolean head) {
 		this.head = head;
-	}
-
-	public boolean isPrinted() {
-		return printed;
-	}
-
-	public void setPrinted(boolean printed) {
-		this.printed = printed;
 	}
 
 	//Override toString to more efficiently display an airplane object

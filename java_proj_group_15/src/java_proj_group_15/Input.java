@@ -59,21 +59,13 @@ public class Input extends Thread {
 					curLine = curLine.substring(0, curLine.length() - 1);
 					caseID = Integer.parseInt(curLine.substring(5));
 					System.out.println("CASE ID: " + caseID);
-					timeTracker.resetTime(); // Time starts at 0 when Case is entered
-					airplanes.clear();
 
-					Iterator<Airplane> iterator = airplanes.iterator();
-					Airplane curPlane = null;
-					while (iterator.hasNext()) {
-						curPlane = iterator.next();
-						curPlane.getParking().getBookings().clear();
-					}
 
 					//Start scenario if enter is pressed with no input
 					//  creates an output
 				} else if (curLine.isEmpty()) {
 					endScenario = true;
-
+					
 				} else if (curLine.startsWith("END")) {
 					killScenario = true;
 					break;

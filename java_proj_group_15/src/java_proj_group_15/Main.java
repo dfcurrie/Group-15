@@ -79,18 +79,30 @@ public class Main {
 		ArrayList<Airplane> airplanes = new ArrayList<Airplane>();
 
 		while (!input.isKillScenario()) {
+			
 			boolean allPlanesFinished = false;
 			Airplane curPlane = null;
 			airplanes.clear();
+			input.setEndScenario(false);
+			timeTracker.resetTime(); // Time starts at 0 when Case is entered
+			
+			for (int i = 0; i < airport.getNumRunways(); i++) {
+				airport.getRunways().get(i).setOccupied(false);
+			}
+			for (int i = 0; i < airport.getNumParkings(); i++) {
+				airport.getParkings().get(i).setOccupied(false);
+				airport.getParkings().get(i).getBookings().clear();
+			}
+			
+
 			while (!input.isEndScenario()) {
-				while (airplanes.isEmpty()) {
 					Airplane plane = null;
 					plane = queue.poll();
 					if (plane != null) {
 						airplanes.add(plane);
 						System.out.println(airplanes.toString());
 					}
-				}
+
 
 				Iterator<Airplane> iterator = airplanes.iterator();
 
@@ -112,11 +124,7 @@ public class Main {
 					curPlane = iterator2.next();
 					if (!curPlane.hasFinished()) {
 						allPlanesFinished = false;
-					} else if (curPlane.hasFinished() && !curPlane
-							.isPrinted()) {
-						curPlane.setPrinted(true);
-
-					}
+					} 
 				}
 			}
 
@@ -124,10 +132,8 @@ public class Main {
 			Output output = new Output(airplanes);
 			if (allPlanesFinished) {
 				output.runPossible(curPlane.getCaseID(), timeTracker);
-				input.setEndScenario(false);
 			} else if (!allPlanesFinished) {
 				output.runImpossible(curPlane.getCaseID());
-				input.setEndScenario(false);
 			}
 		}
 	}
