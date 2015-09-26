@@ -77,7 +77,6 @@ public class Input extends Thread {
 
 					List<String> planeInfo = Arrays.asList(curLine.split(
 							"\\s*,\\s*"));
-					//System.out.println(planeInfo.toString());
 
 					ID = Integer.parseInt(planeInfo.get(0));
 					fuel = Integer.parseInt(planeInfo.get(1));
@@ -86,12 +85,11 @@ public class Input extends Thread {
 					taxiTime = Integer.parseInt(planeInfo.get(4));
 					unloadTime = Integer.parseInt(planeInfo.get(5));
 
-					//Create the airplane with the paramaters
+					//Create the airplane with the parameters
 					Airplane plane = new Airplane(ID, fuel, burnRate, landTime,
 							taxiTime, unloadTime, caseID, timeTracker);
-//					airplanes.add(plane);
 					queue.put(plane);
-					//System.out.println(airplanes);
+					//System.out.println(airplanes);	//debug
 					//Print confirmation message of airplane creation
 					//					System.out.println("New Airplane created: " + ID + fuel
 					//							+ burnRate + landTime + taxiTime + unloadTime);
