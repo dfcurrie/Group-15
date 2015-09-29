@@ -22,3 +22,13 @@ eval ex mem = (0, [])
 -- returns the result of the evaluation of the "last" expression and the final updated memory
 run :: Prg -> Mem -> (Int, Mem)
 run prg mem = (0, [])
+
+
+-- A function to help with evaluating functions that don't require looking into Mem
+-- returns the result of the function. Essentially a simpler version of eval
+eval_1 :: Exp -> Int 
+eval_1 (CONST x) = x
+eval_1 (ADD x y) = (eval_1 x) + (eval_1 y)
+eval_1 (SUB x y) = (eval_1 x) - (eval_1 y)
+eval_1 (MUL x y) = (eval_1 x) * (eval_1 y)
+eval_1 (DIV x y) = (eval_1 x) `div` (eval_1 y)
