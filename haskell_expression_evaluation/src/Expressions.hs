@@ -16,7 +16,15 @@ type Mem = [(String, Int)]
 -- A function that evaluates an expression given a memory
 -- returns the result of the computation and the updated memory
 eval :: Exp -> Mem -> (Int, Mem)
-eval ex mem = (0, [])
+--eval ex mem = (0, [])
+eval (CONST cnst) mem = (cnst, [])
+eval (ADD ex y) mem = (fst(eval ex []) + fst(eval y []), [])
+eval (SUB ex y) mem = (fst(eval ex []) - fst(eval y []), [])
+eval (MUL ex y) mem = (fst(eval ex []) * fst(eval y []), [])
+eval (DIV ex y) mem = (fst(eval ex []) `div` fst(eval y []), [])
+eval (VAR strng) mem = return value in var strng
+eval (ASN strng ex) mem = put ex in var strng
+
 
 -- A function that runs a series of expressions (i.e. a program) given a memory
 -- returns the result of the evaluation of the "last" expression and the final updated memory
