@@ -45,12 +45,15 @@ replaceVar (str,y) (x:xs)
 -- A function that runs a series of expressions (i.e. a program) given a memory
 -- returns the result of the evaluation of the "last" expression and the final updated memory
 run :: Prg -> Mem -> (Int, Mem)
-run prg mem
+run [] mem = (0, mem)
+run (x:xs) mem
+    | xs == [] = eval x mem
+    | otherwise = run xs (snd(eval x mem))
 --If the first item in prg is the same as the last, just add it to mem
-    | (head)prg == (last)prg = (eval((head)prg) mem)
+--    | (head)prg == (last)prg = (eval((head)prg) mem)
 --Otherwise, try to add the first element in prg into mem and run again
 --with everything but the first item in prg, can't get this part to work
-    | otherwise = ((eval((head)prg) mem) + (run (tail)prg mem))
+--    | otherwise = ((eval((head)prg) mem) + (run (tail)prg mem))
 {-
 run prg mem = (0, [])
 run prg mem = (eval (fst(prg)) [])
@@ -58,39 +61,3 @@ run prg mem = (eval (fst(prg)) [])
 type Prg = [Exp]
 type Mem = [(String, Int)]
 -}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
