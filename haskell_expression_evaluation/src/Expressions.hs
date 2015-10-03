@@ -17,10 +17,10 @@ type Mem = [(String, Int)]
 -- returns the result of the computation and the updated memory
 eval :: Exp -> Mem -> (Int, Mem)
 eval (CONST cnst) mem = (cnst, mem)
-eval (ADD ex y) mem = (fst(eval ex mem) + fst(eval y mem), snd(eval ex mem) ++ snd(eval y mem))
-eval (SUB ex y) mem = (fst(eval ex mem) - fst(eval y mem), snd(eval ex mem) ++ snd(eval y mem))
-eval (MUL ex y) mem = (fst(eval ex mem) * fst(eval y mem), snd(eval ex mem) ++ snd(eval y mem))
-eval (DIV ex y) mem = (fst(eval ex mem) `div` fst(eval y mem), snd(eval ex mem) ++ snd(eval y mem))
+eval (ADD ex y) mem = (fst(eval ex mem) + fst(eval y (snd(eval ex mem))), snd(eval y (snd(eval ex mem))))
+eval (SUB ex y) mem = (fst(eval ex mem) - fst(eval y (snd(eval ex mem))), snd(eval y (snd(eval ex mem))))
+eval (MUL ex y) mem = (fst(eval ex mem) * fst(eval y (snd(eval ex mem))), snd(eval y (snd(eval ex mem))))
+eval (DIV ex y) mem = (fst(eval ex mem) `div` fst(eval y (snd(eval ex mem))), snd(eval y (snd(eval ex mem))))
 eval (ASN strng ex) mem = (fst(eval ex mem), (replaceVar (strng, fst(eval ex mem)) mem))
 eval (VAR strng) mem = (ridMaybeInt 0 (lookup strng mem), mem)
 
