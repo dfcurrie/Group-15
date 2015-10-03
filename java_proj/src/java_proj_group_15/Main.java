@@ -22,8 +22,7 @@ public class Main {
 			// Print a description of what the program does if java Main -h is
 			// run
 			if (args[0].equals("-h")) {
-				System.out.println(
-						"Rayce Rossum		Rayce.Rossum@gmail.com\nCaleb Steele-Lane	csteele@ucalgary.ca\nDavid Currie		dfcurrie@ucalgary.ca\nJoshua Hong		johong@ucalgary.ca\n\nProgram: Airport Landing Simulator\nDescription:This a program to simulates the landing of planes at an airport\nand determines whether a group of planes could land with certain amounts\nof fuel and varying taxi/runwaytime\n\nHow to run: This program runs from command line\nto run it you must input into the command line like this\n<program_name> -f <input_file_name> -o <output_file_name>\nwhere the input_file_name contains the information\nR=(number of runways)\nP=(number of parking spaces)\nT=(time units)\nand output_file_name is the name of the file\nwhere you want the information outputted\n\nThen the program will ask for each of following for each CASE\n• ID: is the unique identifier of the plane.\n• Fuel: is an integer showing how much fuel the plane has.\n• Fuel burn rate: is an integer showing how much fuel is burnt at a unit of\ntime.\n• Landing time: is an integer showing how many units of time it takes for\nthe plane to land.\n• Taxi time: is an integer showing how many units of time it takes for the\nplane to reach the parking, after it had landed.\n• Unload time: is an integer showing how many units of time it takes for\nthe plane to unload its cargo, after it had arrived at the parking\nwith the program beginning to run in real time\n after you've entered the first case\n\n\nafter each scenario the program outputs either\nThis if it fails because one of the planes runs out of fuel before parking\nCASE <number>: IMPOSSIBLE\n<emty_line>\n\n\nor if the Scenario is successful\nCASE <number>: POSSIBLE\n<plain_id> LANDED AT <time_unit> WITH <fuel> REMAINING.\n.....\n{for all planes in this scenario}\n.....\n<empty_line>\n");
+				System.out.println();
 				System.exit(1);
 
 				// Run the program on a file containing variables of state
@@ -54,7 +53,7 @@ public class Main {
 	public static void run() {
 		// Read from input file to create so called "airport state" and prints
 		// variables contained
-		Reader reader = new Reader(System.getProperty("user.dir") + "\\"
+		Reader reader = new Reader(System.getProperty("user.dir") + "/"
 				+ inputFile);
 		System.out.println(reader.toString());
 
