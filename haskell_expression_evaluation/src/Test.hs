@@ -1,33 +1,48 @@
-module Main where
 import Expressions
 import Data.Maybe
+import Data.Function (on)
+import Data.List (sortBy)
 
-check :: (Show a, Eq a, Show b) => (b -> a) -> a -> b -> Maybe String
-check f expectation arg 
-  | expectation == (f arg) = Nothing
-  | otherwise              = Just $ "for < " ++ (show arg)
-                             ++ " > expected  < " ++ (show expectation)
-                             ++ " > got < " ++ (show (f arg)) ++ " >"
+sortRes :: Ord b => (a, [(b,c)]) -> (a, [(b,c)])
+sortRes (a, m) = (a, sortTuple m)
+
+sortTuple :: Ord a => [(a,b)] -> [(a,b)]
+sortTuple xs = sortBy (compare `on` fst) xs
+
+
+check f arg expectation points text
+  | sortRes expectation ==  sortRes (f arg)   = points ++ "\tpassed! " ++ text
+  | otherwise                                 = "0\tfailed! " ++ text ++
+                                              ". Expected  <" ++ (show (sortRes expectation)) ++
+                                              "> Got <" ++ (show (sortRes (f arg))) ++ ">"
 
 checkEval = check $ uncurry eval
 checkPrgm = check $ uncurry run
 
-arg :: Int
-arg = 10
-prgm_1 = (ASN "x" (CONST 0)) : [(ASN "x" (ADD (VAR "x") (CONST n))) | n <- [0..arg]]
-expect_1 = truncate (toRational arg*(toRational (arg-1))/2.0)
 
-tests :: [Maybe String]
+tests :: [String]
 tests = [
-  checkEval (5, []) ((ADD (CONST 2) (CONST 3)), [])
-  , checkEval (1, []) ((SUB (CONST 3) (CONST 2)), [])
-  , checkEval (4, []) ((MUL (CONST 2) (CONST 2)), [])
-  , checkEval (3, []) ((DIV (CONST 9) (CONST 3)), [])
-  , checkEval (2, [("x", 2)]) ((VAR "x"), [("x", 2)])
-  , checkEval (2, [("x", 2)]) ((ASN "x" (CONST 2)), [])
-  , checkEval (3, [("x", 3)]) ((ASN "x" (CONST 3)), [("x", 2)])
-
-  , checkPrgm (expect_1, [("x", expect_1)]) (prgm_1, [("arg_1", arg)])
+    "======== Checking Eval ===================================================="
+  , checkEval ((ADD (CONST 2) (CONST 3)), []) (5, []) "5" "(2+3) [] -> (5,[])"
+  , checkEval ((SUB (CONST 2) (CONST 3)), []) (-1, []) "5" "(2-3) [] -> (-1,[])"
+  , checkEval ((MUL (CONST 2) (CONST 3)), []) (6, []) "5" "(2*3) [] -> (6,[])"
+  , checkEval ((DIV (CONST 2) (CONST 3)), []) (0, []) "5" "(2/3) [] -> (0,[])"
+  , checkEval ((VAR "x"), [("x",1)]) (1, [("x",1)]) "5" "(x) [(x=1)] -> (1, [(x,1)])"
+  , checkEval ((ASN "x" (CONST 1)), []) (1, [("x",1)]) "5" "(x=1) [] -> (1, [(x,1)])"
+  , checkEval ((ASN "x" (CONST 1)), [("y",2)]) (1,  [("x",1),("y",2)]) "5" "(x=1) [(y,2)] -> (1, [(x,1),(y,2)])"
+  , checkEval ((ADD (ASN "x" (CONST 1)) (ASN "y" (CONST 2))), []) (3, [("x",1),("y",2)]) "5" "(x=1 + y=2) [] -> (3, [(x,1),(y,2)])"
+  , checkEval ((ADD (MUL (CONST 2) (ASN "x" (CONST 2)) ) (SUB (CONST 3) (MUL (CONST 4) (ASN "y" (CONST 2))))), [("z",1)]) (-1, [("x",2),("y",2),("z",1)]) "10" "( (2 * x=2) + (3 - (4 * y=2) )  ) [(z,1)] -> (-1, [(x,2), (y,2), (z,1)]"
+  , "======== Checking Run ===================================================="
+  , checkPrgm ([(ADD (CONST 1) (CONST 2))], []) (3, [])  "5" "[1+2] [] -> (3, [])"
+  , checkPrgm ([ADD (VAR "x") (CONST 2)], [("x",1)]) (3, [("x",1)])  "5" "[x+2] [(x,1)] -> (3, [(x,1)])"
+  , checkPrgm ([ADD (CONST 2) (CONST 1), ADD (CONST 2) (CONST 3), ADD (CONST 3) (CONST 4), ADD (CONST 4) (CONST 5)], [("x",1)]) (9,[("x",1)])  "5" "[2+1, 2+3, 3+4, 4+5] [(x,1)] -> (9, [(x,1)])"
+  , checkPrgm ([ADD (CONST 2) (CONST 1), ADD (CONST 2) (CONST 3), ADD (CONST 3) (CONST 4), ADD (CONST 4) (CONST 5)], []) (9,[])  "10" "[2+1, 2+3, 3+4, 4+5] [] -> (9, [])"
+  , checkPrgm ([ASN "x" (CONST 2), ASN "y" (CONST 3), ASN "z" (CONST 4), ASN "w" (ADD (VAR "x") (MUL (VAR "y") (VAR "z")))], []) (14,[("x",2),("y",3),("z",4),("w",14)])  "10" "[x=2, y=3, z=4, w=(x+(y*z))] [] -> (14, [(x,2),(y,3),(z,4),(w,14)])"
+  , "======== Bonus points ===================================================="
+  , checkPrgm ([ASN "x" (CONST 2), ASN "x" (ADD (VAR "x") (CONST 3)), ASN "y" (MUL (VAR "x") (CONST 2)), ASN "z" (VAR "y")], []) (10,[("x",5),("y",10),("z",10)])  "10" "[x=2, x=(x+3), y=(x*2), z=y] [] -> (10, [(x,5),(y,10),(z,10)])"
+  , "======== Your code should pass 'at most' one the following two ==========="
+  , checkEval (ADD (ASN "x" (ADD (CONST 2) (VAR "x"))) (ASN "x" (SUB (VAR "x") (CONST 1))), [("x",10)]) (21, [("x",9)]) "15" "( (x=(2 + x)) + (x=(x - 1)) ) [(x,10)] -> (21, [(x,9)])"
+  , checkEval (ADD (ASN "x" (ADD (CONST 2) (VAR "x"))) (ASN "x" (SUB (VAR "x") (CONST 1))), [("x",10)]) (23, [("x",11)]) "20" "( (x=(2 + x)) + (x=(x - 1)) ) [(x,10)] -> (23, [(x,11)])"
   ]
 main :: IO ()
 main = for each
@@ -36,4 +51,4 @@ main = for each
     for (x:xs) = do
       _ <- putStrLn x
       for xs
-    each = [ result | test <- tests, result <- maybeToList test ]
+    each = [ test | test <- tests ]
