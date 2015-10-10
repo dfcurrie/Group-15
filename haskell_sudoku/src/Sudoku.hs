@@ -18,12 +18,43 @@ rows (Sudoku rs) = rs
 
 -- allBlankSudoku is a sudoku with just blanks
 allBlankSudoku :: Sudoku
-allBlankSudoku = undefined
+allBlankSudoku = Sudoku (replicate 9 (replicate 9 Nothing))
 
 -- isSudoku sud checks if sud is really a valid representation of a sudoku
 -- puzzle
 isSudoku :: Sudoku -> Bool
-isSudoku = undefined
+isSudoku (Sudoku []) = False
+isSudoku (Sudoku a)  
+    | (numRowsIs9 a) && (numColumnsIs9 a) && (applyToRow a) = True
+    | otherwise = False
+
+-- numRowsIs9 rows checks if there are 9 rows in the sudoku
+numRowsIs9 ::[[Maybe Int]] -> Bool
+numRowsIs9 x
+    | (length x) == 9 = True
+    | otherwise = False
+
+-- numColumnsIs9 columns checks if there are 9 columns in the sudoku
+numColumnsIs9 :: [[Maybe Int]] -> Bool
+numColumnsIs9 [] = False
+numColumnsIs9 (x:xs)
+    | (length x) /= 9 = False
+    | xs == [] = True
+    | otherwise = numColumnsIs9 xs
+    
+-- Two functions that make sure everything in puzzle is a num between 1-9 or nothing
+applyToRow :: [[Maybe Int]] -> Bool
+applyToRow [] = True
+applyToRow (x:xs) = (checkValidInput x) && (applyToRow xs)
+    
+checkValidInput :: [Maybe Int] -> Bool
+checkValidInput [] = True
+checkValidInput (Nothing:xs) = checkValidInput xs
+checkValidInput ((Just x):xs)
+    | x < 1 = False
+    | x > 9 = False 
+    | otherwise = checkValidInput xs
+
 
 -- isSolved sud checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
