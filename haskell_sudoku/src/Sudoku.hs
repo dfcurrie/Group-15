@@ -58,8 +58,22 @@ checkValidInput ((Just x):xs)
 
 -- isSolved sud checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
-isSolved = undefined
+isSolved (Sudoku []) = False
+isSolved (Sudoku a)
+    | (sudNotBlank a) = True
+    | otherwise = False
 
+sudNotBlank :: [[Maybe Int]] -> Bool
+sudNotBlank [] = True
+sudNotBlank (x:xs) = (checkSolveInput x) && (sudNotBlank xs)
+
+checkSolveInput :: [Maybe Int] -> Bool
+checkSolveInput [] = True
+checkSolveInput (Nothing:xs) = False
+checkSolveInput ((Just x):xs)
+    | x < 1 = False
+    | x > 9 = False 
+    | otherwise = checkSolveInput xs
 -------------------------------------------------------------------------
 
 -- printSudoku sud prints a representation of the sudoku sud on the screen
