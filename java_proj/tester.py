@@ -30,16 +30,17 @@ class testCase():
             res += 'echo "' + str(plane).translate(None, " ") + '"\n'
         res += 'echo ""\n'
         res += 'sleep ' + str(self.wait_after * self.time_unit) + '\n'
-        res += 'echo "END"'
+        # res += 'echo "END"'
         return res
 
     def execute(self):
         fname = self.case_name + ".sh"
         with open(fname, "w") as f:
             f.write(str(self))
+            f.write('echo "END"\n')
         call(["rm", "-f", "output.txt"])
         call(["chmod", "+x", fname])
-        call(["./tester.sh", "./"+fname, str(20*self.time_unit)])
+        call(["./tester.sh", "./"+fname, str(40*self.time_unit)])
 
     def parse_output(self, opath):
         with open(opath) as f:
@@ -157,19 +158,32 @@ cases[8] = testCase(9, planes, wait_time, 0, 0, False, [], None, None, time_unit
 
 # crash in air
 planes = [(1,10,1,1,1,1), (2,10,1,1,1,1), (3,1,1,1,1,1)]
-wait_time = []
+wait_time = [0,0,0]
 cases[9] = testCase(10,planes, wait_time, 0, 0, False, [], None, None, time_unit)
 
 
-f = open("result.txt", "w")
-for case in cases:
+#f = open("result.txt", "w")
+#for case in cases:
 #case = cases[0]
 #print case
-    case.execute()
-    case.parse_output("output.txt")
-    res = case.check_output()
-    f.write(res)
-    f.flush()
+#   case.execute()
+#   case.parse_output("output.txt")
+#   res = case.check_output()
+#   f.write(res)
+#   f.flush()
 
+#f.close()
+
+
+fname = "all_cases.sh"
+f = open(fname, "w")
+
+for case in cases:
+    f.write(str(case))
+f.write('echo "END"\n')
 f.close()
+
+call(["rm", "-f", "output.txt"])
+call(["chmod", "+x", fname])
+call(["./tester.sh", "./"+fname, str(40*30)])
 

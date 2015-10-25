@@ -1,1 +1,3 @@
-Exception in thread "main" 
+Exception in thread "main" java.lang.NullPointerException
+	at java_proj_group_15.Main.run(Unknown Source)
+	at java_proj_group_15.Main.main(Unknown Source)
