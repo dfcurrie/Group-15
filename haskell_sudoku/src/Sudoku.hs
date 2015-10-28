@@ -145,8 +145,28 @@ isOkay sud = and [ isOkayBlock block | block <- blocks sud]
 
 type Pos = (Int,Int)
 
+--Checks for the next blank spot in the sudoku
 blank :: Sudoku -> Pos
-blank = undefined
+blank (Sudoku []) = (0,0)
+blank (Sudoku a)
+    | (isSolved (Sudoku a)) == True = error "Sudoku is already solved!"
+    | otherwise = (isBlank a 0)
+
+isBlank :: [[Maybe Int]] -> Int -> Pos
+isBlank (x:xs) n
+    | (checkBlankInRow x) == True = (n, getBlankLoc x 0)
+    | otherwise = isBlank xs (n+1)
+
+--Checks the row to see if a blank exists
+checkBlankInRow :: [Maybe Int] -> Bool
+checkBlankInRow [] = False
+checkBlankInRow (Nothing:xs) = True
+checkBlankInRow ((Just x):xs) = checkBlankInRow xs
+
+--Returns the location of the blank within the row
+getBlankLoc :: [Maybe Int] -> Int -> Int
+getBlankLoc (Nothing:t) n = n
+getBlankLoc ((Just h):t) n = getBlankLoc t (n+1)
 
 
 (!!=) :: [a] -> (Int,a) -> [a]
