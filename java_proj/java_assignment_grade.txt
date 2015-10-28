@@ -2,6 +2,6 @@ setter_methods: 0 /10
 direct_property_access: 10 /10
 long_methods: 10 /20
 free_marks: 15 /15
-test_cases:  0 /45
+test_cases:  26 /45
 compile_bonus: 10 /10
-total from 100  =  45
+total from 100  =  71

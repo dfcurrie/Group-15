@@ -1,12 +1,13 @@
-case 1: 0
-case 2: 0
-case 3: 0
-case 4: 0
-case 5: 0
-case 6: 0
-case 7: 0
-case 8: 0
+case 1: .5
+case 2: .7
+case 3: .3
+case 4: .5
+case 5: .7
+case 6: .5
+case 7: 1
+case 8: 1
 case 9: 0
 
 description:
-did not produce any output for single test cases.
+Your fuels are generally correct, but the landing times are not.
+You got 26 / 45 for test cases
