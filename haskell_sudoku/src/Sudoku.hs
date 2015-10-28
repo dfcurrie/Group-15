@@ -2,16 +2,18 @@ module Sudoku where
 
 import Data.List
 import Data.Maybe
+import Data.Char
+import Data.List.Split
 
 -------------------------------------------------------------------------
 
 data Sudoku = Sudoku [[Maybe Int]]
  deriving ( Eq )
 
-instance Show Sudoku where
-  show (Sudoku ls) = show [ [ f m | m <- row] | row <- ls]
-    where
-      f m = fromMaybe "_" $ fmap (show) m
+--instance Show Sudoku where
+-- show (Sudoku ls) = show [ [ f m | m <- row] | row <- ls]
+--    where
+--      f m = fromMaybe "_" $ fmap (show) m
 
 rows :: Sudoku -> [[Maybe Int]]
 rows (Sudoku rs) = rs
@@ -78,12 +80,39 @@ checkSolveInput ((Just x):xs)
 
 -- printSudoku sud prints a representation of the sudoku sud on the screen
 printSudoku :: Sudoku -> IO ()
-printSudoku = undefined
+printSudoku (Sudoku sud) = 
+    do
+        putStr (rowsToString sud) 
+
+rowsToString :: [[Maybe Int]] -> String
+rowsToString [] = "\n"
+rowsToString (x:xs) = (rowToString x) ++ (rowsToString xs) 
+
+rowToString :: [Maybe Int] -> String
+rowToString [] = "\n"
+rowToString (Nothing:xs) = '.':(rowToString xs)
+rowToString ((Just a):xs) = (chr (a + 48)):(rowToString xs)
 
 -- readSudoku file reads from the file, and either delivers it, or stops
 -- if the file did not contain a sudoku
 readSudoku :: FilePath -> IO Sudoku
-readSudoku = undefined
+readSudoku file = 
+    do
+        str <- readFile file
+        let columns = lines str
+        printSudoku (Sudoku (makeColumns columns))
+        return (Sudoku (makeColumns columns))
+
+makeColumns :: [String] -> [[Maybe Int]]
+makeColumns a = map makeRow a
+
+makeRow :: String -> [Maybe Int]
+makeRow a = map charToMaybeInt a
+
+charToMaybeInt :: Char -> Maybe Int
+charToMaybeInt '.' = Nothing
+charToMaybeInt a = Just (digitToInt a)
+
 
 -------------------------------------------------------------------------
 
