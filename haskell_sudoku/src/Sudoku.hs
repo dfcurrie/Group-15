@@ -168,13 +168,18 @@ getBlankLoc :: [Maybe Int] -> Int -> Int
 getBlankLoc (Nothing:t) n = n
 getBlankLoc ((Just h):t) n = getBlankLoc t (n+1)
 
-
+--Given a list and a tuple containing an index in the list and a new value
+--updates the given list with the new value at the given index
 (!!=) :: [a] -> (Int,a) -> [a]
-(!!=) = undefined
+(!!=) (h:t) (n,m)
+    | fst(n,m) /= 0 = h:(!!=) t ((fst(n,m) - 1),m)
+    | otherwise = snd(n,m):t
+    
 
 
 update :: Sudoku -> Pos -> Maybe Int -> Sudoku
 update = undefined
+--update (Sudoku a) (n,m) (Just x/Nothing)
 
 
 solve :: Sudoku -> [Maybe Sudoku]
