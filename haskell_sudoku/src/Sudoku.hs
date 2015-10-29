@@ -168,6 +168,7 @@ getBlankLoc :: [Maybe Int] -> Int -> Int
 getBlankLoc (Nothing:t) n = n
 getBlankLoc ((Just h):t) n = getBlankLoc t (n+1)
 
+
 --Given a list and a tuple containing an index in the list and a new value
 --updates the given list with the new value at the given index
 (!!=) :: [a] -> (Int,a) -> [a]
@@ -188,15 +189,24 @@ getRow (x:xs) (n,m) (i)
     | snd(n,m) /= 0 = (getCol (x) (m) (i)) : xs
     | otherwise = x:xs
 
-    --Finds the correct column that needs updating
+--Finds the correct column that needs updating
 getCol :: [Maybe Int] -> Int -> Maybe Int-> [Maybe Int]
 getCol (h:t) n i
     | n /= 0 = h : getCol t (n-1) i
     | otherwise = i:t
     
 
+--solve the sudoku, returning "Nothing" if impossible
+--and returning the solved sudoku if it is possible
 solve :: Sudoku -> [Maybe Sudoku]
 solve = undefined
+
+
+{-Read a sudoku from a file, solve it and print the answer
+    If impossible to solve, print "No Solution!"
+    Otherwise, print every possible solution-}
+readAndSolve :: FilePath -> IO ()
+readAndSolve = undefined
 
 example :: Sudoku
 example =
