@@ -176,11 +176,24 @@ getBlankLoc ((Just h):t) n = getBlankLoc t (n+1)
     | otherwise = snd(n,m):t
     
 
-
+--given a Sudoku, position, and new cell value, update the given sudoku
 update :: Sudoku -> Pos -> Maybe Int -> Sudoku
-update = undefined
---update (Sudoku a) (n,m) (Just x/Nothing)
+update (Sudoku a) (n,m) (i) = (Sudoku (getRow a (n,m) i))
 
+--Finds the correct row that needs updating, then calls for Column
+getRow :: [[Maybe Int]] -> Pos -> Maybe Int -> [[Maybe Int]]
+getRow (x:xs) (n,m) (i)
+    | (fst(n,m) == 0) && (snd(n,m) == 0) = (i:(tail x)):xs
+    | fst(n,m) /= 0 = x : getRow (xs) (n-1,m) (i)
+    | snd(n,m) /= 0 = (getCol (x) (m) (i)) : xs
+    | otherwise = x:xs
+
+    --Finds the correct column that needs updating
+getCol :: [Maybe Int] -> Int -> Maybe Int-> [Maybe Int]
+getCol (h:t) n i
+    | n /= 0 = h : getCol t (n-1) i
+    | otherwise = i:t
+    
 
 solve :: Sudoku -> [Maybe Sudoku]
 solve = undefined
