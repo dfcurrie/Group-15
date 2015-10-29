@@ -196,10 +196,23 @@ getCol (h:t) n i
     | otherwise = i:t
     
 
---solve the sudoku, returning "Nothing" if impossible
+{-solve the sudoku, returning "Nothing" if impossible
 --and returning the solved sudoku if it is possible
+
+First guard = given solved sudoku
+Second guard = sudoku is full but violates constraints
+Third guard = if given a sudoku that is not full
+-}
 solve :: Sudoku -> [Maybe Sudoku]
-solve = undefined
+solve sud
+    | (((isSudoku sud)&&(isSolved sud)) && (isOkay sud)) == True = [Just sud]
+    | (((isSudoku sud)&&(isSolved sud)) == True) && (isOkay sud == False) = [Nothing]
+    | ((isSudoku sud)==True)&&((isSolved sud)==False) =
+--        do
+--        solve(update sud (blank sud) (Just 1))
+            
+--testUpdate :: Sudoku -> Pos -> Maybe Int -> Sudoku
+--testUpdate sud pos i = update sud pos i
 
 
 {-Read a sudoku from a file, solve it and print the answer
