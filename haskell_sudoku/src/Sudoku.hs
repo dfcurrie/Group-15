@@ -100,7 +100,6 @@ readSudoku file =
     do
         str <- readFile file
         let columns = lines str
-        printSudoku (Sudoku (makeColumns columns))
         return (Sudoku (makeColumns columns))
 
 makeColumns :: [String] -> [[Maybe Int]]
@@ -205,7 +204,7 @@ Third guard = if given a sudoku that is not full
 -}
 solve :: Sudoku -> [Maybe Sudoku]
 solve sud
-    | (((isSudoku sud)&&(isSolved sud)) && (isOkay sud)) == True = [Just sud]
+   | (((isSudoku sud)&&(isSolved sud)) && (isOkay sud)) == True = [Just sud]
     | (((isSudoku sud)&&(isSolved sud)) == True) && (isOkay sud == False) = [Nothing]
     | ((isSudoku sud)==True)&&((isSolved sud)==False) =
 --        do
@@ -219,7 +218,11 @@ solve sud
     If impossible to solve, print "No Solution!"
     Otherwise, print every possible solution-}
 readAndSolve :: FilePath -> IO ()
-readAndSolve = undefined
+readAndSolve filePath = 
+    do  
+        sud <- readSudoku filePath
+        printSudoku sud
+-- eventually printSudoku (solve sud)
 
 example :: Sudoku
 example =
