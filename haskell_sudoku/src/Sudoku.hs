@@ -26,49 +26,29 @@ allBlankSudoku = Sudoku (replicate 9 (replicate 9 Nothing))
 -- isSudoku sud checks if sud is really a valid representation of a sudoku
 -- puzzle
 isSudoku :: Sudoku -> Bool
-isSudoku (Sudoku []) = False
-isSudoku (Sudoku a)  
-    | (numRowsIs9 a) && (numColumnsIs9 a) && (applyToRow a) = True
-    | otherwise = False
+isSudoku sud  = (length grid == 9) && 
+                    (length (transpose grid) == 9) && 
+                        (and (map (all isSudokuValue) grid)) 
+    where
+        grid = rows sud
 
--- numRowsIs9 rows checks if there are 9 rows in the sudoku
-numRowsIs9 ::[[Maybe Int]] -> Bool
-numRowsIs9 x
-    | (length x) == 9 = True
-    | otherwise = False
-
--- numColumnsIs9 columns checks if there are 9 columns in the sudoku
-numColumnsIs9 :: [[Maybe Int]] -> Bool
-numColumnsIs9 [] = False
-numColumnsIs9 (x:xs)
-    | (length x) /= 9 = False
-    | xs == [] = True
-    | otherwise = numColumnsIs9 xs
-    
--- Two functions that make sure everything in puzzle is a num between 1-9 or nothing
-applyToRow :: [[Maybe Int]] -> Bool
-applyToRow [] = True
-applyToRow (x:xs) = (checkValidInput x) && (applyToRow xs)
-    
-checkValidInput :: [Maybe Int] -> Bool
-checkValidInput [] = True
-checkValidInput (Nothing:xs) = checkValidInput xs
-checkValidInput ((Just x):xs)
+-- Checks if value at array is a valid value for a Sudoku (nothing, or 1-9)
+isSudokuValue :: Maybe Int -> Bool
+isSudokuValue Nothing = True
+isSudokuValue (Just x)
     | x < 1 = False
-    | x > 9 = False 
-    | otherwise = checkValidInput xs
-
+    | x > 9 = False
+    | otherwise = True
 
 -- isSolved sud checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
-isSolved (Sudoku []) = False
-isSolved (Sudoku a)
-    | (sudNotBlank a) = True
-    | otherwise = False
+isSolved sud = (and (map (all notBlank) grid))
+    where
+        grid = rows sud
 
-sudNotBlank :: [[Maybe Int]] -> Bool
-sudNotBlank [] = True
-sudNotBlank (x:xs) = (checkSolveInput x) && (sudNotBlank xs)
+notBlank :: Maybe Int -> Bool
+notBlank Nothing = False
+notBlank _ = True
 
 checkSolveInput :: [Maybe Int] -> Bool
 checkSolveInput [] = True
@@ -81,13 +61,13 @@ checkSolveInput ((Just x):xs)
 
 -- printSudoku sud prints a representation of the sudoku sud on the screen
 printSudoku :: Sudoku -> IO ()
-printSudoku (Sudoku sud) = 
+printSudoku sud = 
     do
-        putStr (rowsToString sud) 
+        putStr (sudToString (rows sud)) 
 
-rowsToString :: [[Maybe Int]] -> String
-rowsToString [] = "\n"
-rowsToString (x:xs) = (rowToString x) ++ (rowsToString xs) 
+sudToString :: [[Maybe Int]] -> String
+sudToString [] = "\n"
+sudToString (x:xs) = (rowToString x) ++ (sudToString xs) 
 
 rowToString :: [Maybe Int] -> String
 rowToString [] = "\n"
@@ -100,11 +80,12 @@ readSudoku :: FilePath -> IO Sudoku
 readSudoku file = 
     do
         str <- readFile file
-        let columns = lines str
-        return (Sudoku (makeColumns columns))
+        let rows = lines str
+            sud = Sudoku (makeSud rows)
+        return (sud)
 
-makeColumns :: [String] -> [[Maybe Int]]
-makeColumns a = map makeRow a
+makeSud :: [String] -> [[Maybe Int]]
+makeSud a = map makeRow a
 
 makeRow :: String -> [Maybe Int]
 makeRow a = map charToMaybeInt a
