@@ -82,7 +82,10 @@ readSudoku file =
         str <- readFile file
         let rows = lines str
             sud = Sudoku (makeSud rows)
-        return (sud)
+        if not(isSudoku sud)
+            then ioError (userError "Not a Sudoku!")
+            else return sud
+        return sud
 
 makeSud :: [String] -> [[Maybe Int]]
 makeSud a = map makeRow a
@@ -92,7 +95,9 @@ makeRow a = map charToMaybeInt a
 
 charToMaybeInt :: Char -> Maybe Int
 charToMaybeInt '.' = Nothing
-charToMaybeInt a = Just (digitToInt a)
+charToMaybeInt a 
+    | isHexDigit a = Just (digitToInt a)
+    | otherwise = Just 0
 
 
 -------------------------------------------------------------------------
@@ -185,7 +190,7 @@ getCol (h:t) n i
 First guard = given solved sudoku
 Second guard = sudoku is full but violates constraints
 Third guard = if given a sudoku that is not full
--}
+
 type Choice a = [a]
 
 choose :: [a] -> Choice a
@@ -227,7 +232,7 @@ help sud pos check = do
     x <- choose [Just 1,Just 2,Just 3,Just 4,Just 5,Just 6,Just 7,Just 8,Just 9]
     guard (isOkay (update sud pos (x)) == True)
     return (update sud pos (x))
-    
+ -}   
     
     
 --testUpdate :: Sudoku -> Pos -> Maybe Int -> Sudoku
