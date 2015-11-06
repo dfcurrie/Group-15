@@ -11,10 +11,10 @@ import Control.Monad
 data Sudoku = Sudoku [[Maybe Int]]
  deriving ( Eq )
 
---instance Show Sudoku where
--- show (Sudoku ls) = show [ [ f m | m <- row] | row <- ls]
---    where
---      f m = fromMaybe "_" $ fmap (show) m
+instance Show Sudoku where
+ show (Sudoku ls) = show [ [ f m | m <- row] | row <- ls]
+    where
+      f m = fromMaybe "_" $ fmap (show) m
 
 rows :: Sudoku -> [[Maybe Int]]
 rows (Sudoku rs) = rs
@@ -26,11 +26,17 @@ allBlankSudoku = Sudoku (replicate 9 (replicate 9 Nothing))
 -- isSudoku sud checks if sud is really a valid representation of a sudoku
 -- puzzle
 isSudoku :: Sudoku -> Bool
-isSudoku sud  = (length grid == 9) && 
-                    (length (transpose grid) == 9) && 
+isSudoku sud  = (lengthNine grid) && 
+                    (and (map lengthNine grid)) && 
                         (and (map (all isSudokuValue) grid)) 
     where
         grid = rows sud
+        
+        
+lengthNine :: [a] -> Bool
+lengthNine list
+    | (length list) == 9 = True
+    | otherwise = False
 
 -- Checks if value at array is a valid value for a Sudoku (nothing, or 1-9)
 isSudokuValue :: Maybe Int -> Bool
@@ -49,14 +55,6 @@ isSolved sud = (and (map (all notBlank) grid))
 notBlank :: Maybe Int -> Bool
 notBlank Nothing = False
 notBlank _ = True
-
-checkSolveInput :: [Maybe Int] -> Bool
-checkSolveInput [] = True
-checkSolveInput (Nothing:xs) = False
-checkSolveInput ((Just x):xs)
-    | x < 1 = False
-    | x > 9 = False 
-    | otherwise = checkSolveInput xs
 -------------------------------------------------------------------------
 
 -- printSudoku sud prints a representation of the sudoku sud on the screen
@@ -180,7 +178,32 @@ getCol :: [Maybe Int] -> Int -> Maybe Int-> [Maybe Int]
 getCol (h:t) n i
     | n /= 0 = h : getCol t (n-1) i
     | otherwise = i:t
-    
+   
+solve :: Sudoku -> [Maybe Sudoku]
+solve sud 
+        |(isSudoku sud == False) = [Nothing]
+        |otherwise = recurseSolve sud []
+            
+recurseSolve :: Sudoku -> [Maybe Sudoku] -> [Maybe Sudoku]
+recurseSolve sud suds
+        | (isSolved sud) = insertSud suds sud
+        | otherwise = allNum 1 sud
+        
+insertSud :: [Maybe Sudoku] -> Sudoku -> [Maybe Sudoku]
+insertSud suds sud
+    | isOkay sud = (Just sud):suds
+    | otherwise = suds
+        
+allNum :: Int -> Sudoku -> [Maybe Sudoku]
+allNum 10 _ = []
+allNum x sud = (recurseSolve (update sud (blank sud) (Just x)) []) ++ allNum (x+1) sud
+
+printAll :: [Maybe Sudoku] -> IO()
+printAll [] = putStrLn "All Donesies"
+printAll (Nothing:xs) = printAll xs
+printAll ((Just x):xs) = do 
+                            printSudoku x 
+                            printAll xs
 
 {-solve the sudoku, returning "Nothing" if impossible
 --and returning the solved sudoku if it is possible
@@ -246,8 +269,7 @@ readAndSolve :: FilePath -> IO ()
 readAndSolve filePath = 
     do  
         sud <- readSudoku filePath
-        printSudoku sud
--- eventually printSudoku (solve sud)
+        printAll (solve sud)
 
 example :: Sudoku
 example =
@@ -266,11 +288,11 @@ example =
 example2 :: Sudoku
 example2 =
     Sudoku
-      [ [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 6,Just 5,Just 1,Just 9,Just 3,Just 7,Just 4,Just 8,Just 2]
+      [ [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Nothing,Just 9,Just 1]
+      , [Just 6,Just 5,Just 1,Nothing,Just 3,Just 7,Just 4,Just 8,Just 2]
       , [Just 4,Just 2,Just 9,Just 6,Just 1,Just 8,Just 5,Just 3,Just 7]
       , [Just 8,Just 9,Just 2,Just 7,Just 5,Just 4,Just 3,Just 1,Just 6]
-      , [Just 7,Just 3,Just 5,Just 1,Just 8,Just 6,Just 2,Just 4,Nothing]
+      , [Just 7,Just 3,Just 5,Nothing,Just 8,Just 6,Just 2,Just 4,Nothing]
       , [Just 1,Just 6,Just 4,Just 3,Just 2,Just 9,Just 8,Just 7,Just 5]
       , [Just 2,Just 1,Just 7,Just 4,Just 6,Just 3,Just 9,Just 5,Nothing]
       , [Just 9,Just 8,Just 3,Just 2,Just 7,Just 5,Just 1,Just 6,Nothing]
