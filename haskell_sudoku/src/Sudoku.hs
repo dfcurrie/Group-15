@@ -186,13 +186,9 @@ solve sud
             
 recurseSolve :: Sudoku -> [Maybe Sudoku] -> [Maybe Sudoku]
 recurseSolve sud suds
-        | (isSolved sud) = insertSud suds sud
-        | otherwise = allNum 1 sud
-        
-insertSud :: [Maybe Sudoku] -> Sudoku -> [Maybe Sudoku]
-insertSud suds sud
-    | isOkay sud = (Just sud):suds
-    | otherwise = suds
+    | not (isOkay sud) = suds
+    | isSolved sud = (Just sud):suds
+    | otherwise = allNum 1 sud
         
 allNum :: Int -> Sudoku -> [Maybe Sudoku]
 allNum 10 _ = []
