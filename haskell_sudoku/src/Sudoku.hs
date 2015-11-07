@@ -11,10 +11,10 @@ import Control.Monad
 data Sudoku = Sudoku [[Maybe Int]]
  deriving ( Eq )
 
---instance Show Sudoku where
--- show (Sudoku ls) = show [ [ f m | m <- row] | row <- ls]
---    where
---      f m = fromMaybe "_" $ fmap (show) m
+instance Show Sudoku where
+ show (Sudoku ls) = show [ [ f m | m <- row] | row <- ls]
+    where
+      f m = fromMaybe "_" $ fmap (show) m
 
 rows :: Sudoku -> [[Maybe Int]]
 rows (Sudoku rs) = rs
@@ -24,75 +24,58 @@ allBlankSudoku :: Sudoku
 allBlankSudoku = Sudoku (replicate 9 (replicate 9 Nothing))
 
 -- isSudoku sud checks if sud is really a valid representation of a sudoku
--- puzzle
+-- puzzle. (Is 9 by 9)
 isSudoku :: Sudoku -> Bool
-isSudoku (Sudoku []) = False
-isSudoku (Sudoku a)  
-    | (numRowsIs9 a) && (numColumnsIs9 a) && (applyToRow a) = True
+isSudoku sud  = (lengthNine grid) && 
+                    (and (map lengthNine grid)) && 
+                        (and (map (all isSudokuValue) grid)) 
+    where
+        grid = rows sud
+        
+--Checks that the length given is 9.
+lengthNine :: [a] -> Bool
+lengthNine list
+    | (length list) == 9 = True
     | otherwise = False
 
--- numRowsIs9 rows checks if there are 9 rows in the sudoku
-numRowsIs9 ::[[Maybe Int]] -> Bool
-numRowsIs9 x
-    | (length x) == 9 = True
-    | otherwise = False
-
--- numColumnsIs9 columns checks if there are 9 columns in the sudoku
-numColumnsIs9 :: [[Maybe Int]] -> Bool
-numColumnsIs9 [] = False
-numColumnsIs9 (x:xs)
-    | (length x) /= 9 = False
-    | xs == [] = True
-    | otherwise = numColumnsIs9 xs
-    
--- Two functions that make sure everything in puzzle is a num between 1-9 or nothing
-applyToRow :: [[Maybe Int]] -> Bool
-applyToRow [] = True
-applyToRow (x:xs) = (checkValidInput x) && (applyToRow xs)
-    
-checkValidInput :: [Maybe Int] -> Bool
-checkValidInput [] = True
-checkValidInput (Nothing:xs) = checkValidInput xs
-checkValidInput ((Just x):xs)
+-- Checks if value at array is a valid value for a Sudoku (nothing, or 1-9)
+isSudokuValue :: Maybe Int -> Bool
+isSudokuValue Nothing = True
+isSudokuValue (Just x)
     | x < 1 = False
-    | x > 9 = False 
-    | otherwise = checkValidInput xs
-
+    | x > 9 = False
+    | otherwise = True
 
 -- isSolved sud checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
-isSolved (Sudoku []) = False
-isSolved (Sudoku a)
-    | (sudNotBlank a) = True
-    | otherwise = False
+isSolved sud = (and (map (all notBlank) grid))
+    where
+        grid = rows sud
 
-sudNotBlank :: [[Maybe Int]] -> Bool
-sudNotBlank [] = True
-sudNotBlank (x:xs) = (checkSolveInput x) && (sudNotBlank xs)
-
-checkSolveInput :: [Maybe Int] -> Bool
-checkSolveInput [] = True
-checkSolveInput (Nothing:xs) = False
-checkSolveInput ((Just x):xs)
-    | x < 1 = False
-    | x > 9 = False 
-    | otherwise = checkSolveInput xs
+--Checks if the value given is Nothing, i.e. a blank
+notBlank :: Maybe Int -> Bool
+notBlank Nothing = False
+notBlank _ = True
 -------------------------------------------------------------------------
 
 -- printSudoku sud prints a representation of the sudoku sud on the screen
 printSudoku :: Sudoku -> IO ()
-printSudoku (Sudoku sud) = 
+printSudoku sud = 
     do
-        putStr (rowsToString sud) 
+        putStr (sudToString (rows sud)) 
 
-rowsToString :: [[Maybe Int]] -> String
-rowsToString [] = "\n"
-rowsToString (x:xs) = (rowToString x) ++ (rowsToString xs) 
+{-sudToString and rowToString work together to change a given sudoku
+into a printable version, changing Just values to the value as is
+and changing Nothing values into .-}
+sudToString :: [[Maybe Int]] -> String
+sudToString [] = "\n"
+sudToString (x:xs) = (rowToString x) ++ (sudToString xs) 
 
 rowToString :: [Maybe Int] -> String
 rowToString [] = "\n"
 rowToString (Nothing:xs) = '.':(rowToString xs)
 rowToString ((Just a):xs) = (chr (a + 48)):(rowToString xs)
+
 
 -- readSudoku file reads from the file, and either delivers it, or stops
 -- if the file did not contain a sudoku
@@ -100,22 +83,33 @@ readSudoku :: FilePath -> IO Sudoku
 readSudoku file = 
     do
         str <- readFile file
-        let columns = lines str
-        return (Sudoku (makeColumns columns))
+        let rows = lines str
+            sud = Sudoku (makeSud rows)
+        if not(isSudoku sud)
+            then ioError (userError "Not a Sudoku!")
+            else return sud
+        return sud
 
-makeColumns :: [String] -> [[Maybe Int]]
-makeColumns a = map makeRow a
+{-Essentially does the reverse of sudToString and rowToString
+by converting a visually appealling sudoku into a readable
+sudoku -}
+makeSud :: [String] -> [[Maybe Int]]
+makeSud a = map makeRow a
 
 makeRow :: String -> [Maybe Int]
 makeRow a = map charToMaybeInt a
 
 charToMaybeInt :: Char -> Maybe Int
 charToMaybeInt '.' = Nothing
-charToMaybeInt a = Just (digitToInt a)
+charToMaybeInt a 
+    | isHexDigit a = Just (digitToInt a)
+    | otherwise = Just 0
 
 
 -------------------------------------------------------------------------
 
+--isOkay checks every row/column/block for any repeats in numbers.
+--The rest of these functions are helper functions
 type Block = [Maybe Int]
 isOkayBlock :: Block -> Bool
 isOkayBlock [] = True
@@ -194,63 +188,42 @@ getCol :: [Maybe Int] -> Int -> Maybe Int-> [Maybe Int]
 getCol (h:t) n i
     | n /= 0 = h : getCol t (n-1) i
     | otherwise = i:t
-    
+   
 
-{-solve the sudoku, returning "Nothing" if impossible
---and returning the solved sudoku if it is possible
-
-
-
-First guard = given solved sudoku
-Second guard = sudoku is full but violates constraints
-Third guard = if given a sudoku that is not full
--}
-type Choice a = [a]
-
-choose :: [a] -> Choice a
-choose xs = xs
-
+--Solve every possibility of the given sudoku
 solve :: Sudoku -> [Maybe Sudoku]
-solve sud
-    | (((isSudoku sud)&&(isSolved sud)) && (isOkay sud)) == True = [Just sud]
-    | (((isSudoku sud)&&(isSolved sud)) == True) && (isOkay sud == False) = [Nothing]
-    | ((isSudoku sud)==True)&&((isSolved sud)==False) =
-        do
-            let pos = blank sud
-            solve (help sud pos False 1)
-            
---solveConstraint
+solve sud 
+        |(isSudoku sud == False) = [Nothing]
+        | solved == [] = [Nothing]
+        | otherwise = solved
+            where solved = recurseSolve sud []
+
+{-checks to see if the given sudoku is solved
+returns a list of solved sudokus if it is,
+otherwise, continues trying to solve-}
+recurseSolve :: Sudoku -> [Maybe Sudoku] -> [Maybe Sudoku]
+recurseSolve sud suds
+    | not (isOkay sud) = suds
+    | isSolved sud = (Just sud):suds
+    | otherwise = allNum 1 sud
+
+--try adding in 1-9 recursively into the sudoku and checking if it works
+allNum :: Int -> Sudoku -> [Maybe Sudoku]
+allNum 10 _ = []
+allNum x sud = (recurseSolve (update sud (blank sud) (Just x)) []) ++ allNum (x+1) sud
 
 
---call update, see if it works with new input
---if not, then increment input and call update again until it works
---if it doesn't work for all 9 inputs, return Error "Nothing"
---if it does work, call solve again on the next blank
-            
-
---take a sudoku and a counter
---first guard = n is out of bounds
---second guard = n is out of bounds
---helper :: Sudoku -> Pos -> Bool -> Int -> Sudoku
---helper sud pos check n
---    | (n > 9) || (n < 1) || (check == True) = sud
---    | ((n > 0) && (n < 10)) && (check == False) = 
---        do
---            let newSud = (update sud pos (Just n))
---            helper newSud pos (isOkay newSud) (n+1)
-    
-        
-    --check isOkay = true, then call solve again recursively
-help :: Sudoku -> Pos -> Bool -> Sudoku
-help sud pos check = do
-    x <- choose [Just 1,Just 2,Just 3,Just 4,Just 5,Just 6,Just 7,Just 8,Just 9]
-    guard (isOkay (update sud pos (x)) == True)
-    return (update sud pos (x))
-    
-    
-    
---testUpdate :: Sudoku -> Pos -> Maybe Int -> Sudoku
---testUpdate sud pos i = update sud pos i
+--Print the first sudoku in the list of solved sudokus and then
+--"All Donsies" or print "No solution" if no solution
+printAll :: [Maybe Sudoku] -> IO()
+printAll [Nothing] = putStrLn "No solution!"
+printAll (Nothing:xs) = printAll xs
+printAll [(Just x)] = do 
+                            printSudoku x 
+                            putStrLn "All Donesies"
+printAll ((Just x):xs) = do 
+                            printSudoku x 
+                            printAll xs
 
 
 {-Read a sudoku from a file, solve it and print the answer
@@ -260,8 +233,7 @@ readAndSolve :: FilePath -> IO ()
 readAndSolve filePath = 
     do  
         sud <- readSudoku filePath
-        printSudoku sud
--- eventually printSudoku (solve sud)
+        printAll (solve sud)
 
 example :: Sudoku
 example =
@@ -276,36 +248,6 @@ example =
       , [Nothing,Just 8, Just 3, Nothing,Nothing,Nothing,Nothing,Just 6, Nothing]
       , [Nothing,Nothing,Just 7, Just 6, Just 9, Nothing,Nothing,Just 4, Just 3]
       ]
-      
-example2 :: Sudoku
-example2 =
-    Sudoku
-      [ [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 6,Just 5,Just 1,Just 9,Just 3,Just 7,Just 4,Just 8,Just 2]
-      , [Just 4,Just 2,Just 9,Just 6,Just 1,Just 8,Just 5,Just 3,Just 7]
-      , [Just 8,Just 9,Just 2,Just 7,Just 5,Just 4,Just 3,Just 1,Just 6]
-      , [Just 7,Just 3,Just 5,Just 1,Just 8,Just 6,Just 2,Just 4,Nothing]
-      , [Just 1,Just 6,Just 4,Just 3,Just 2,Just 9,Just 8,Just 7,Just 5]
-      , [Just 2,Just 1,Just 7,Just 4,Just 6,Just 3,Just 9,Just 5,Nothing]
-      , [Just 9,Just 8,Just 3,Just 2,Just 7,Just 5,Just 1,Just 6,Nothing]
-      , [Just 5,Just 4,Just 6,Just 8,Just 9,Just 1,Just 7,Just 2,Nothing]
-      ]
- --last unfinished sudoku column 127695843
-      
-badExample :: Sudoku
-badExample =
-    Sudoku
-      [ [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 8,Just 9,Just 2,Just 7,Just 5,Just 4,Just 3,Just 1,Just 6]
-      , [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      , [Just 3,Just 7,Just 8,Just 5,Just 4,Just 2,Just 6,Just 9,Just 1]
-      ]
-      
       
 complete :: Sudoku
 complete =
