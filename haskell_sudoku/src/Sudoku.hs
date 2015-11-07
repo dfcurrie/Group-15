@@ -182,7 +182,9 @@ getCol (h:t) n i
 solve :: Sudoku -> [Maybe Sudoku]
 solve sud 
         |(isSudoku sud == False) = [Nothing]
-        |otherwise = recurseSolve sud []
+        | solved == [] = [Nothing]
+        | otherwise = solved
+            where solved = recurseSolve sud []
             
 recurseSolve :: Sudoku -> [Maybe Sudoku] -> [Maybe Sudoku]
 recurseSolve sud suds
@@ -195,15 +197,15 @@ allNum 10 _ = []
 allNum x sud = (recurseSolve (update sud (blank sud) (Just x)) []) ++ allNum (x+1) sud
 
 printAll :: [Maybe Sudoku] -> IO()
-printAll [] = putStrLn "All Donesies"
+printAll [Nothing] = putStrLn "No solution!"
 printAll (Nothing:xs) = printAll xs
+printAll [(Just x)] = do 
+                            printSudoku x 
+                            putStrLn "All Donesies"
 printAll ((Just x):xs) = do 
                             printSudoku x 
                             printAll xs
 
-
-    
-    
 --testUpdate :: Sudoku -> Pos -> Maybe Int -> Sudoku
 --testUpdate sud pos i = update sud pos i
 
