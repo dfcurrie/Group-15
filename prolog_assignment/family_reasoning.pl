@@ -13,9 +13,9 @@ fatherOf(A, B) :- hasChild(A, X), male(A).
 grandparentOf(A, B) :- parentOf(A, X), parentOf (X, B).
 grandmotherOf(A, B) :- parentOf(A, X), motherOf(X, B).
 grandfatherOf(A, B) :- parentOf(A, X), fatherOf(X, B).
-%greatgrandparentOf(A, B).
-%greatgrandmotherOf(A, B).                            
-%greatgrandfatherOf(A, B).                            
+greatgrandparentOf(A, B) :- grandparent(A, X), parentOf(X, B).
+greatgrandmotherOf(A, B) :- greatgrandparentOf(A, B), female(A).                             
+greatgrandfatherOf(A, B) :- greatgrandparentOf(A, B), male(A).                            
 childOf(A, B) :- parentOf(B, A).
 daughterOf(A, B) :- parentOf(B, A), female(A).
 sonOf(A, B) :- parentOf(B, A), male(A).
