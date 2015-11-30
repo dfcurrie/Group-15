@@ -1,5 +1,5 @@
-ymodule Sudoku where
--- Group 15
+module Sudoku where
+
 import Data.List
 import Data.Maybe
 import Data.Char
