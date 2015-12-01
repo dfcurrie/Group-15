@@ -33,9 +33,9 @@ greatgrandsonOf(A, B) :- greatgrandchildOf(A, B), male(A).
 %childless(A).
 %hasChildren(A, L).
 %countChildren(A, N).
-%sibling(X, Y).
-%sisterOf(A, B).
-%brotherOf(A, B).
+sibling(X, Y):- parentOf(X, A), parentOf(X, B).
+sisterOf(A, B) :- sibling(A, B), female(A).
+brotherOf(A, B) :- sibling(A, B), male(A).
 %stepSibling(A, B).
 %stepSisterOf(A, B).
 %stepBrotherOf(A, B).
