@@ -22,9 +22,9 @@ sonOf(A, B) :- parentOf(B, A), male(A).
 grandchildOf(A, B) :- parentOf(B,X), parent(X,A).
 granddaughterOf(A, B) :- grandchildOf(A, B), female(A).
 grandsonOf(A, B) :- grandchildOf(A, B) male(A).
-%greatgrandchildOf(A, B).
-%greatgranddaughterOf(A, B).
-%greatgrandsonOf(A, B).
+greatgrandchildOf(A, B) :- grandchildOf(X, B), parent(X, A).
+greatgranddaughterOf(A, B) :-greatgrandchildOf(A, B), female(A).
+greatgrandsonOf(A, B) :- greatgrandchildOf(A, B), male(A).
 %ancestorOf(A, B) :- parentOf(A, B).
 %ancestorOf(A, B, N).
 %descendantOf(A, B, N).
