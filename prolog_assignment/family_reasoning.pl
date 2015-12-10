@@ -37,6 +37,12 @@ stepSisterOf(A, B) :- stepSibling(A, B), female(A).
 stepBrotherOf(A, B) :- stepSibling(A, B), male(A).
 cousin(A, B) :- parentOf(X,A), parentOf(Y,B), sibling(X,Y), A\=B.
 isanimal(A) :- male(A); female(A).
+
+getSpecies(A, B) :- species(A, B); (pet(A); pet(X), related(A, X)); (pet(X), \+related(A, X)).
+pet(A) :- setof(X, (isanimal(A), owns(X, A)),L).
+% feral(A) :- \+pet(A), 
+
+
 % getSpecies(A, B) :- species(A, B) ; ((hasChild(X, A), getSpecies(X, B)) ; ((parentOf(X, A)), getSpecies(X, B))).
 % pet(A) :- owns(X, A), getSpecies(A, cat) ; owns(X, A), getSpecies(A, dog).
 % feral(A) :- (getSpecies(A, cat) ; getSpecies(A, dog)), (\+(owns(X, A))).
