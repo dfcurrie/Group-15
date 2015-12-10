@@ -16,21 +16,20 @@ grandsonOf(A, B) :- grandchildOf(A, B), male(A).
 greatgrandchildOf(A, B) :- grandchildOf(X, B), parent(X, A).
 greatgranddaughterOf(A, B) :-greatgrandchildOf(A, B), female(A).
 greatgrandsonOf(A, B) :- greatgrandchildOf(A, B), male(A).
-ancestorOf(A, B) :- parentOf(A, B).
-ancestorOf(A, B) :- parentOf(A, X), ancestorOf(X, B).
+ancestorOf(A, B) :- parentOf(A, B), A\=B.
+ancestorOf(A, B) :- parentOf(A, X), ancestorOf(X, B), A\=B.
 
 %ancestorOf(A, B, N).
 %descendantOf(A, B, N).
 %related(A, B) :- ancestorOf(A,B)
-%parent(A).
+
 % parent(A) :- parentOf(A, X).
-%childless(A).
 % childless(A) :- parent(A), !.
+
 %hasChildren(A, L).
 %countChildren(A, N).
-%sibling(X, Y):- parentOf(X, A), parentOf(X, B).
-%sibling(A, B) :- parentOf(X, A), parentOf(X, B).
 
+sibling(A, B) :- parentOf(X, A), parentOf(X, B), A\=B.
 sisterOf(A, B) :- sibling(A, B), female(A).
 brotherOf(A, B) :- sibling(A, B), male(A).
 %stepSibling(A, B).
