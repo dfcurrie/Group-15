@@ -36,14 +36,11 @@ stepSibling(A, B) :- setof(X, Y^(fatherOf(X, A), motherOf(Y, A), fatherOf(W, B),
 stepSisterOf(A, B) :- stepSibling(A, B), female(A).
 stepBrotherOf(A, B) :- stepSibling(A, B), male(A).
 cousin(A, B) :- parentOf(X,A), parentOf(Y,B), sibling(X,Y), A\=B.
+
 isanimal(A) :- male(A); female(A).
+human(A) :- isanimal(A), \+pet(A), \+feral(A).
+dog(A) :- (pet(A); feral(A)), \+species(A, cat).
 
-getSpecies(A, B) :- species(A, B); (pet(A); pet(X), related(A, X)); (pet(X), \+related(A, X)).
+getSpecies(A, B) :- setof(X, Y^(species(A, B); dog(A), B=dog; human(A), B=human),L).
 pet(A) :- setof(X, (isanimal(A), owns(X, A)),L).
-% feral(A) :- \+pet(A), 
-
-
-% getSpecies(A, B) :- species(A, B) ; ((hasChild(X, A), getSpecies(X, B)) ; ((parentOf(X, A)), getSpecies(X, B))).
-% pet(A) :- owns(X, A), getSpecies(A, cat) ; owns(X, A), getSpecies(A, dog).
-% feral(A) :- (getSpecies(A, cat) ; getSpecies(A, dog)), (\+(owns(X, A))).
-% getSpecies(A, B) :- species(A, B) ; (((hasChild(X, A)), (species(X, B) ; getSpecies(X, B))),! ; ((parentOf(A, X)), (species(X, B) ; getSpecies(X, B))),!).
+feral(A) :- setof(X, Y^(isanimal(A), \+pet(A), (pet(X), related(A, X); pet(X), related(Y, X), related(A, Y))),L).
