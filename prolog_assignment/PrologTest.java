@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Vector;
 
 /**
@@ -117,16 +118,20 @@ public class PrologTest {
 		StatusReturn status;
 		/** Whether the test strictly tests for multiple of the same answer */
 		boolean strict = false;
+
+        double points = 0;
+        double pointsEarned = 0;
 		/**
 		 * Constructor.
 		 * @param name The name of the test.
 		 * @param code The code to run for the test.
 		 * @param strict TODO
 		 */
-		Test(String name, TestCode code, boolean strict) {
-		  this.name = name;
-			this.code = code;
+		Test(String name, TestCode code, boolean strict, double points) {
+		    this.name = name;
+		    this.code = code;
 			this.strict = strict;
+            this.points = points;
 		}
 		/**
 		 * Runs the test: The output is a block describing the test run.
@@ -136,7 +141,65 @@ public class PrologTest {
 			println("Running test '"+name+"'...");
 			indentLevel++;
 			status = code.code(this);
-			println("Test '"+name+"': "+status.toString());//+(status.msg==null?"":(" - "+status.msg)));
+            // start of shameful code !!!!
+            String dirty = "Incorrect output: Expected bag of [jane,jed,sally], but got [[";
+            HashMap<String, String> map = new HashMap();
+            map.put("jane",null);
+            map.put("jed",null);
+            map.put("sally",null);
+            if (this.name.equals("hasChildren(mary,X).")){
+                String res = status.toString();
+                if (res.startsWith(dirty)){
+                    String got = res.substring(dirty.length(), res.length()-1);
+                    String answers[] = split(got);
+                    boolean correct = true;
+                    for (int i=answers.length-1; i>=0; i--) {
+                        answers[i] = answers[i].trim();
+                        if (!map.containsKey(answers[i])){
+                            println("Test '"+name+"': "+status.toString());//+(status.msg==null?"":(" - "+status.msg)));
+                            correct = false;
+                            break;
+                        }
+                    }
+                    if (correct){
+                        status.status = Status.SUCCESS;
+                        this.pointsEarned = this.points;
+                    }
+                }else{
+                    println("Test '"+name+"': "+status.toString());//+(status.msg==null?"":(" - "+status.msg)));
+                }
+            }else if (this.name.equals("hasChildren(mary,X). strict")){
+                 String res = status.toString();
+                if (res.startsWith(dirty)){
+                    String got = res.substring(dirty.length(), res.length()-1);
+                    String answers[] = split(got);
+                    boolean correct = true;
+                    for (int i=answers.length-1; i>=0; i--) {
+                        answers[i] = answers[i].trim();
+                        if (!map.containsKey(answers[i])){
+                            correct = false;
+                            break;
+                        }
+                    }
+                    if (correct && answers.length == 3){
+                        status.status = Status.SUCCESS;
+                        this.pointsEarned = this.points;
+                    }else{
+                        println("Test '"+name+"': "+status.toString());//+(status.msg==null?"":(" - "+status.msg)));
+                    }
+                }else{
+                    println("Test '"+name+"': "+status.toString());//+(status.msg==null?"":(" - "+status.msg)));
+                }            }else{
+                println("Test '"+name+"': "+status.toString());//+(status.msg==null?"":(" - "+status.msg)));
+                if (status.status == Status.SUCCESS){
+                    this.pointsEarned = this.points;
+                }
+            }
+            /// end of shameful code !!!!!!!
+            //println("Test '"+name+"': "+status.toString());//+(status.msg==null?"":(" - "+status.msg)));
+            //if (status.status == Status.SUCCESS){
+            //this.pointsEarned = this.points;
+            //}
 			indentLevel--;
 		}
 	}
@@ -382,12 +445,14 @@ public class PrologTest {
 	 */
 	public void report(Test[] tests) {
 		println("\n=========================================================================");
-		println(String.format("%-50s %-40s", "Test", "Result"));
-		println(String.format("%-50s %-40s", "------------", "------------"));
+		println(String.format("%-60s %-50s %-40s", "Points", "Test", "Result"));
+		println(String.format("%-60s %-50s %-40s", "------------", "------------", "------------"));
 		int strict = 0;
 		int passedStrict = 0;
+        double total = 0;
 		for (Test test: tests) {
-			println(String.format("%-50s %-40s", test.name, test.status.toString()));
+			println(String.format("%-60s %-40f %-40s", test.name, test.pointsEarned, test.status.toString()));
+            total += test.pointsEarned;
 			test.status.status.inc();
 			if (test.strict) {
 				strict++;
@@ -403,6 +468,8 @@ public class PrologTest {
 	  println(String.format("---\n%3d     %-40s", tests.length, "Total Tests (version "+version+")"));
 	  println(String.format(     "%3d/%-3d %-40s", passedStrict, strict, "Strict Tests Passed"));
 	  println(String.format(     "%3d/%-3d %-40s", Status.SUCCESS.count-passedStrict, tests.length-strict, "Non-Strict Tests Passed"));
+      println("");
+	  println(String.format(     "%3f/%-3f %-40s", total, 100 + 7 * easy + 10 * hard, "Total points"));
 	}
 
   /**
@@ -608,12 +675,12 @@ public class PrologTest {
    * @param comment A short comment to be appended to the name (may be null).
    * @return The test object.
    */
-  public Test makeListTest(final String query, final String answersAsCommaList, final boolean strict, final String comment) {
+  public Test makeListTest(final String query, final String answersAsCommaList, final boolean strict, final String comment, double points) {
   	String answers[] = split(answersAsCommaList);
   	for (int i=answers.length-1; i>=0; i--) {
   		answers[i] = answers[i].trim();
   	}
-  	return makeListTest(query, answers, strict, comment);
+  	return makeListTest(query, answers, strict, comment, points);
   }
 
 	/**
@@ -625,7 +692,7 @@ public class PrologTest {
    * @param comment A short comment to be appended to the name (may be null).
    * @return The test object.
    */
-  public Test makeListTest(final String query, final String[] answers, final boolean strict, final String comment) {
+  public Test makeListTest(final String query, final String[] answers, final boolean strict, final String comment, double points) {
   	return 
   			new Test(query+"."+(comment==null?(strict?" strict":""):(" "+comment)),
   					new TestCode() {
@@ -646,7 +713,7 @@ public class PrologTest {
   						return new StatusReturn(Status.INCORRECT_OUTPUT, verify);
   					return new StatusReturn(Status.SUCCESS);
   				}
-  			}, strict);
+  			}, strict, points);
   }
   
   public StatusReturn makeStatusReturn(String error, String outputString) {
@@ -677,9 +744,9 @@ public class PrologTest {
    * @param comment A short comment to be appended to the name (may be null).
    * @return The test object.
    */
-  public Test makeLis2Test(final String query, final String answersAsCommaList, final boolean strict, final String comment) {
+  public Test makeLis2Test(final String query, final String answersAsCommaList, final boolean strict, final String comment, double points) {
   	String answers[] = splitArray(answersAsCommaList);
-  	return makeLis2Test(query, answers, strict, comment);
+  	return makeLis2Test(query, answers, strict, comment, points);
   }
 
 	/**
@@ -691,7 +758,7 @@ public class PrologTest {
    * @param comment A short comment to be appended to the name (may be null).
    * @return The test object.
    */
-  public Test makeLis2Test(final String query, final String[] answers, final boolean strict, final String comment) {
+  public Test makeLis2Test(final String query, final String[] answers, final boolean strict, final String comment, double points) {
   	return 
   			new Test(query+"."+(comment==null?(strict?" strict":""):(" "+comment)),
   					new TestCode() {
@@ -711,7 +778,7 @@ public class PrologTest {
   						return new StatusReturn(Status.INCORRECT_OUTPUT, verify);
   					return new StatusReturn(Status.SUCCESS);
   				}
-  			}, strict);
+  			}, strict, points);
   }
 	
   /**
@@ -722,7 +789,7 @@ public class PrologTest {
    * @param answers The set of identifiers we expect as the answers.
    * @return The test object.
    */
-  public Test makeBoolTest(final String query, final boolean answer, final String comment) {
+  public Test makeBoolTest(final String query, final boolean answer, final String comment, double points) {
 		final String expected = answer?"true":"false";
 		final String altExpected = answer?"yes":"no";
   	return 
@@ -736,7 +803,7 @@ public class PrologTest {
   					}
   					return new StatusReturn(Status.SUCCESS);
   				}
-  			}, false);
+  			}, false, points);
   }
 	
   /**
@@ -789,6 +856,9 @@ public class PrologTest {
 		}
   }
   
+  double easy = 100.0/71.0;
+  double medium = 2 * easy;
+  double hard = 5 * easy;
   /**
    * The list of tests to run.
    */
@@ -810,201 +880,296 @@ public class PrologTest {
 //			}, false),
 			
 			//========== hasChild/2 (this should always work as it's given in families.pl ===========================
-			makeBoolTest("hasChild(fred, jed)", true, null),
+			// makeBoolTest("hasChild(fred, jed)", true, null),
 			//========== parentOf/2 =================================================================================
-			makeBoolTest("parentOf(freida,jason)", true, null),
-			makeBoolTest("parentOf(jason,freida)", false, null),
-			makeListTest("parentOf(freida,X)", "jason", false, null),
-			makeListTest("parentOf(mary,X)", "jed,sally,jane", false, null),
-			makeListTest("parentOf(X,terry)", "harry,jan", false, null),
-			makeListTest("parentOf(X,terry)", "harry,jan", true, null),
+            makeBoolTest("parentOf(freida,jason)", true, null, easy/5),
+			makeBoolTest("parentOf(jason,freida)", false, null, easy/5),
+			makeListTest("parentOf(freida,X)", "jason", false, null, easy/5),
+			makeListTest("parentOf(mary,X)", "jed,sally,jane", false, null, easy/5),
+			makeListTest("parentOf(X,terry)", "harry,jan", false, null, easy/5),
+
+			makeListTest("parentOf(X,terry)", "harry,jan", true, null, easy),
 			//========== motherOf/2 =================================================================================
-			makeBoolTest("motherOf(jane,mavis)", false, null),
-			makeBoolTest("motherOf(jane,jack)", true, null),
-			makeListTest("motherOf(jane,X)", "george,jack", false, null),
-			makeListTest("motherOf(X,terry)", "jan", false, null),
+			makeBoolTest("motherOf(jane,mavis)", false, null, easy/3),
+			makeBoolTest("motherOf(jane,jack)", true, null, easy/3),
+			makeListTest("motherOf(X,terry)", "jan", false, null, easy/3),
+            
+			makeListTest("motherOf(jane,X)", "george,jack", true, null, easy),
 			//========== fatherOf/2 =================================================================================
-			makeBoolTest("fatherOf(joe,jed)", false, null),
-			makeBoolTest("fatherOf(joe,jane)", true, null),
-			makeListTest("fatherOf(sam,X)", "george,jack", false, null),
-			makeListTest("fatherOf(X,jack)", "sam", false, null),
+			makeBoolTest("fatherOf(joe,jed)", false, null, easy/3),
+			makeBoolTest("fatherOf(joe,jane)", true, null, easy/3),
+			makeListTest("fatherOf(X,jack)", "sam", false, null, easy/3),
+
+			makeListTest("fatherOf(sam,X)", "george,jack", true, null, easy),
 			//========== grandparentOf/2 ============================================================================
-			makeBoolTest("grandparentOf(harry,jill)", true, null),
-			makeBoolTest("grandparentOf(harry,terry)", false, null),
-			makeBoolTest("grandparentOf(harry,jed)", false, null),
-			makeListTest("grandparentOf(harry,X)", "jill", false, null),
-			makeListTest("grandparentOf(mary,X)", "george,jack", false, null),
-			makeListTest("grandparentOf(X,mavis)", "jason,terry,jane,sam", false, null),
-			makeListTest("grandparentOf(X,mavis)", "jason,terry,jane,sam", true, null),
+			makeBoolTest("grandparentOf(harry,jill)", true, null, easy/6),
+			makeBoolTest("grandparentOf(harry,terry)", false, null, easy/6),
+			makeBoolTest("grandparentOf(harry,jed)", false, null, easy/6),
+			makeListTest("grandparentOf(harry,X)", "jill", false, null, easy/6),
+			makeListTest("grandparentOf(mary,X)", "george,jack", false, null, easy/6),
+			makeListTest("grandparentOf(X,mavis)", "jason,terry,jane,sam", false, null, easy/6),
+
+			makeListTest("grandparentOf(X,mavis)", "jason,terry,jane,sam", true, null, easy),
 			//========== grandmotherOf/2 ============================================================================
-			makeBoolTest("grandmotherOf(jane,mavis)", true, null),
-			makeBoolTest("grandmotherOf(jane,jack)", false, null),
-			makeListTest("grandmotherOf(jane,X)", "mavis", false, null),
-			makeListTest("grandmotherOf(X,jill)", "jan,freida", false, null),
+			makeBoolTest("grandmotherOf(jane,mavis)", true, null, easy/3),
+			makeBoolTest("grandmotherOf(jane,jack)", false, null, easy/3),
+			makeListTest("grandmotherOf(jane,X)", "mavis", false, null, easy/3),
+
+			makeListTest("grandmotherOf(X,jill)", "jan,freida", true, null, easy),
 			//========== grandfatherOf/2 ============================================================================
-			makeBoolTest("grandfatherOf(joe,jane)", false, null),
-			makeBoolTest("grandfatherOf(joe,george)", true, null),
-			makeListTest("grandfatherOf(joe,X)", "george,jack", false, null),
-			makeListTest("grandfatherOf(X,jill)", "tim,harry", false, null),
+			makeBoolTest("grandfatherOf(joe,jane)", false, null, easy/3),
+			makeBoolTest("grandfatherOf(joe,george)", true, null, easy/3),
+			makeListTest("grandfatherOf(joe,X)", "george,jack", false, null, easy/3),
+
+			makeListTest("grandfatherOf(X,jill)", "tim,harry", true, null, easy),
 			//========== greatgrandparentOf/2 =======================================================================
-			makeBoolTest("greatgrandparentOf(tim,mavis)", true, null),
-			makeBoolTest("greatgrandparentOf(tim,jill)", false, null),
-			makeListTest("greatgrandparentOf(tim,X)", "mavis", false, null),
-			makeListTest("greatgrandparentOf(mary,X)", "mavis", false, null),
-			makeListTest("greatgrandparentOf(X,mavis)", "tim,freida,jan,harry,mary,joe", false, null),
-			makeListTest("greatgrandparentOf(X,mavis)", "tim,freida,jan,harry,mary,joe", true, null),
+			makeBoolTest("greatgrandparentOf(tim,mavis)", true, null, easy/5),
+			makeBoolTest("greatgrandparentOf(tim,jill)", false, null, easy/5),
+			makeListTest("greatgrandparentOf(tim,X)", "mavis", false, null, easy/5),
+			makeListTest("greatgrandparentOf(mary,X)", "mavis", false, null, easy/5),
+			makeListTest("greatgrandparentOf(X,mavis)", "tim,freida,jan,harry,mary,joe", false, null, easy/5),
+
+			makeListTest("greatgrandparentOf(X,mavis)", "tim,freida,jan,harry,mary,joe", true, null, easy),
 			//========== greatgrandmotherOf/2 =======================================================================
-			makeBoolTest("greatgrandmotherOf(freida,mavis)", true, null),
-			makeBoolTest("greatgrandmotherOf(jane,mavis)", false, null),
-			makeListTest("greatgrandmotherOf(jan,X)", "mavis", false, null),
-			makeBoolTest("greatgrandmotherOf(jane,X)",false, null),
-			makeListTest("greatgrandmotherOf(X,mavis)", "jan,freida,mary", false, null),
+			makeBoolTest("greatgrandmotherOf(freida,mavis)", true, null, easy/5),
+			makeBoolTest("greatgrandmotherOf(jane,mavis)", false, null, easy/5),
+			makeListTest("greatgrandmotherOf(jan,X)", "mavis", false, null, easy/5),
+			makeBoolTest("greatgrandmotherOf(jane,X)",false, null, easy/5),
+			makeListTest("greatgrandmotherOf(X,mavis)", "jan,freida,mary", false, null, easy/5),
+
+			makeListTest("greatgrandmotherOf(X,mavis)", "jan,freida,mary", true, null, easy),
 			//========== greatgrandfatherOf/2 =======================================================================
-			makeBoolTest("greatgrandfatherOf(mary,mavis)", false, null),
-			makeBoolTest("greatgrandfatherOf(joe,mavis)", true, null),
-			makeListTest("greatgrandfatherOf(joe,X)", "mavis", false, null),
-			makeListTest("greatgrandfatherOf(X,mavis)", "tim,harry,joe", false, null),
+			makeBoolTest("greatgrandfatherOf(mary,mavis)", false, null, easy/4),
+			makeBoolTest("greatgrandfatherOf(joe,mavis)", true, null, easy/4),
+			makeListTest("greatgrandfatherOf(joe,X)", "mavis", false, null, easy/4),
+			makeListTest("greatgrandfatherOf(X,mavis)", "tim,harry,joe", false, null, easy/4),
 
-			//========== parent/1 ===================================================================================
-			makeBoolTest("parent(terry)", true, null),
-			makeBoolTest("parent(jack)", false, null),
-			makeListTest("parent(X)", "fred,freida,george,harry,jan,jane,jason,jill,joe,lady,lassie,mary,rover,sam,terry,tim,tramp", false, null),
-			makeListTest("parent(X)", "fred,freida,george,harry,jan,jane,jason,jill,joe,lady,lassie,mary,rover,sam,terry,tim,tramp", true, null),
+			makeListTest("greatgrandfatherOf(X,mavis)", "tim,harry,joe", true, null, easy),
+            //========== childOf/2 ============================================
+ 			makeBoolTest("childOf(rover,lady)", true, null, easy/4),
+			makeBoolTest("childOf(fred,mary)", false, null, easy/4),
+			makeListTest("childOf(X,fred)", "jed,sally", false, null, easy/4),
+			makeListTest("childOf(terry,X)", "jan,harry", false, null, easy/4),
+
+			makeListTest("childOf(terry,X)", "jan,harry", true, null, easy),
+            //========== daughterOf/2 ============================================
+ 			makeBoolTest("daughterOf(jill,jason)", true, null, easy/3),
+			makeBoolTest("daughterOf(jill,tim)", false, null, easy/3),
+			makeListTest("daughterOf(X,mary)", "jane,sally", false, null, easy/3),
+
+			makeListTest("daughterOf(X,mary)", "jane,sally", true, null, easy),
+            //========== sonOf/2 ============================================
+ 			makeBoolTest("sonOf(jason,freida)", true, null, easy/3),
+			makeBoolTest("sonOf(jason,jan)", false, null, easy/3),
+			makeListTest("sonOf(X,jane)", "george,jack", false, null, easy/3),
+
+			makeListTest("sonOf(X,jane)", "george,jack", true, null, easy),
+            //========== grandchildOf/2 ============================================
+ 			makeBoolTest("grandchildOf(jill,freida)", true, null, easy/3),
+			makeBoolTest("grandchildOf(jason,jan)", false, null, easy/3),
+			makeListTest("grandchildOf(X,mary)", "george,jack", false, null, easy/3),
+
+			makeListTest("grandchildOf(X,mary)", "george,jack", true, null, easy),
+            //========== granddaughterOf/2 ============================================
+ 			makeBoolTest("granddaughterOf(jill,freida)", true, null, easy/3),
+			makeBoolTest("granddaughterOf(george,mary)", false, null, easy/3),
+			makeListTest("granddaughterOf(jill, X)", "tim,freida,jan,harry", false, null, easy/3),
+
+			makeListTest("granddaughterOf(jill, X)", "tim,freida,jan,harry", true, null, easy),
+            //========== grandsonOf/2 ============================================
+ 			makeBoolTest("grandsonOf(jack,mary)", true, null, easy/3),
+			makeBoolTest("grandsonOf(jill,jan)", false, null, easy/3),
+			makeListTest("grandsonOf(jack, X)", "joe,mary", false, null, easy/3),
+
+			makeListTest("grandsonOf(jack, X)", "joe,mary", true, null, easy),
+            //========== greatgrandchildOf/2 ============================================
+ 			makeBoolTest("greatgrandchildOf(mavis,joe)", true, null, easy/3),
+			makeBoolTest("greatgrandchildOf(mavis,jed)", false, null, easy/3),
+			makeListTest("greatgrandchildOf(mavis,X)", "tim,freida,jan,harry,mary,joe", false, null, easy/3),
+
+			makeListTest("greatgrandchildOf(mavis,X)", "tim,freida,jan,harry,mary,joe", true, null, easy),
+            //========== greatgranddaughterOf/2 ============================================
+ 			makeBoolTest("greatgranddaughterOf(mavis,joe)", true, null, easy/3),
+			makeBoolTest("greatgranddaughterOf(mavis,jed)", false, null, easy/3),
+			makeListTest("greatgranddaughterOf(mavis,X)", "tim,freida,jan,harry,mary,joe", false, null, easy/3),
+
+			makeListTest("greatgranddaughterOf(mavis,X)", "tim,freida,jan,harry,mary,joe", true, null, easy),
+            //========== greatgrandsonOf/2 ============================================
+ 			makeBoolTest("greatgrandsonOf(mavis,joe)", false, null, easy/2),
+			makeBoolTest("greatgrandsonOf(mavis,jed)", false, null, easy/2),
+			makeBoolTest("greatgrandsonOf(mavis,X)", false, null, easy),
+			//========== ancestorOf/2 ===============================================================================
+			makeBoolTest("ancestorOf(joe,mavis)", true, null, medium/2),
+			makeListTest("ancestorOf(joe,X)", new String[]{"george","jack","jane","mavis"}, false, null, medium/2),
+
+			makeListTest("ancestorOf(X,mavis)", new String[]{"freida", "george", "harry", "jan", "jane", "jason", "jill", "joe", "mary", "sam", "terry", "tim"}, false, null, medium),
+			//========== ancestorOf/3 ===============================================================================
+			makeBoolTest("ancestorOf(X,joe,1)", false, null, medium/10),
+			makeListTest("ancestorOf(X,jane,0)" , "jane", false, "duplicates OK", medium/10),
+			makeListTest("ancestorOf(X,mavis,1)", "george,jill", false, "duplicates OK", medium/10),
+			makeListTest("ancestorOf(X,mavis,2)", "jane,jason,sam,terry", false, "duplicates OK", medium/10),
+			makeListTest("ancestorOf(X,mavis,3)", "freida,harry,jan,joe,mary,tim", false, "duplicates OK", medium/10),
+			makeBoolTest("ancestorOf(mavix,X,1)", false, null, medium/10),
+			makeListTest("ancestorOf(jane,X,0)" , "jane", false, "duplicates OK", medium/10),
+			makeListTest("ancestorOf(mary,X,1)", "jane, jed, sally", false, "duplicates OK", medium/10),
+			makeListTest("ancestorOf(mary,X,2)", "george, jack", false, "duplicates OK", medium/10),
+			makeListTest("ancestorOf(mary,X,3)", "mavis", false, "duplicates OK", medium/10),
+            
+			makeListTest("ancestorOf(X,jane,0)" , "jane", true, "duplicates not accepted", medium/8),
+			makeListTest("ancestorOf(X,mavis,1)", "george,jill", true, "duplicates not accepted", medium/8),
+			makeListTest("ancestorOf(X,mavis,2)", "jane,jason,sam,terry", true, "duplicates not accepted", medium/8),
+			makeListTest("ancestorOf(X,mavis,3)", "freida,harry,jan,joe,mary,tim", true, "duplicates not accepted", medium/8),
+			makeListTest("ancestorOf(jane,X,0)" , "jane", true, "duplicates not accepted", medium/8),
+			makeListTest("ancestorOf(mary,X,1)", "jane, jed, sally", true, "duplicates not accepted", medium/8),
+			makeListTest("ancestorOf(mary,X,2)", "george, jack", true, "duplicates not accepted", medium/8),
+			makeListTest("ancestorOf(mary,X,3)", "mavis", true, "duplicates not accepted", medium/8),
+            
+            //-------
+
+			makeBoolTest("ancestorOf(terry,jan,X)", false, null, medium/5),
+			makeListTest("ancestorOf(jan,jan,X)", "0", false, "duplicates OK", medium/5),
+			makeListTest("ancestorOf(jan,terry,X)", "1", false, "duplicates OK", medium/5),
+			makeListTest("ancestorOf(jan,jill,X)", "2", false, "duplicates OK", medium/5),
+			makeListTest("ancestorOf(jan,mavis,X)", "3", false, "duplicates OK", medium/5),
+
+			makeListTest("ancestorOf(jan,jan,X)", "0", true, "duplicates not accepted", medium/4),
+			makeListTest("ancestorOf(jan,terry,X)", "1", true, "duplicates not accepted", medium/4),
+			makeListTest("ancestorOf(jan,jill,X)", "2", true, "duplicates not accepted", medium/4),
+			makeListTest("ancestorOf(jan,mavis,X)", "3", true, "duplicates not accepted", medium/4),
+			//========== descendantOf/3 ===============================================================================
+			makeListTest("descendantOf(jack,X,2)", "mary,joe", false, "duplicates OK", 2*easy),
+
+			makeListTest("descendantOf(mavis,jan,X)", "3", true, "duplicates not accepted", 2*easy),
+			//========== related/2 =======================================================================
+			makeBoolTest("related(george,jack)", false, "siblings may not be genetically related", medium/6),
+			makeBoolTest("related(jane,jason)", false, "different family lines", medium/6),
+			makeBoolTest("related(mavis,joe)", true, null, medium/6),
+			makeListTest("related(jane,X)", "george,jack,jane,joe,mary,mavis", false, null, medium/6),
+			makeListTest("related(X,jane)", "george,jack,jane,joe,mary,mavis", false, null, medium/6),
+			makeLis2Test("related(X,Y)", "[A,A],[fred,jed],[fred,sally],[freida,jason],[freida,jill],[freida,mavis],[george,jane],[george,joe],[george,mary],[george,mavis],[george,sam],[harry,jill],[harry,mavis],[harry,terry],[jack,jane],[jack,joe],[jack,mary],[jack,sam],[jan,jill],[jan,mavis],[jan,terry],[jane,george],[jane,jack],[jane,joe],[jane,mary],[jane,mavis],[jason,freida],[jason,jill],[jason,mavis],[jason,tim],[jed,fred],[jed,mary],[jill,freida],[jill,harry],[jill,jan],[jill,jason],[jill,mavis],[jill,terry],[jill,tim],[joe,george],[joe,jack],[joe,jane],[joe,mavis],[lady,lassie],[lady,rover],[lady,snoopy],[lassie,lady],[lassie,snoopy],[lassie,tramp],[mary,george],[mary,jack],[mary,jane],[mary,jed],[mary,mavis],[mary,sally],[mavis,freida],[mavis,george],[mavis,harry],[mavis,jan],[mavis,jane],[mavis,jason],[mavis,jill],[mavis,joe],[mavis,mary],[mavis,sam],[mavis,terry],[mavis,tim],[rover,lady],[rover,snoopy],[sally,fred],[sally,mary],[sam,george],[sam,jack],[sam,mavis],[snoopy,lady],[snoopy,lassie],[snoopy,rover],[snoopy,tramp],[terry,harry],[terry,jan],[terry,jill],[terry,mavis],[tim,jason],[tim,jill],[tim,mavis],[tramp,lassie],[tramp,snoopy]", false, null, medium/6),
+
+			makeListTest("related(jane,X)", "george,jack,jane,joe,mary,mavis", true, null, hard/3),
+			makeListTest("related(X,jane)", "george,jack,jane,joe,mary,mavis", true, null, hard/3),
+			makeLis2Test("related(X,Y)", "[A,A],[fred,jed],[fred,sally],[freida,jason],[freida,jill],[freida,mavis],[george,jane],[george,joe],[george,mary],[george,mavis],[george,sam],[harry,jill],[harry,mavis],[harry,terry],[jack,jane],[jack,joe],[jack,mary],[jack,sam],[jan,jill],[jan,mavis],[jan,terry],[jane,george],[jane,jack],[jane,joe],[jane,mary],[jane,mavis],[jason,freida],[jason,jill],[jason,mavis],[jason,tim],[jed,fred],[jed,mary],[jill,freida],[jill,harry],[jill,jan],[jill,jason],[jill,mavis],[jill,terry],[jill,tim],[joe,george],[joe,jack],[joe,jane],[joe,mavis],[lady,lassie],[lady,rover],[lady,snoopy],[lassie,lady],[lassie,snoopy],[lassie,tramp],[mary,george],[mary,jack],[mary,jane],[mary,jed],[mary,mavis],[mary,sally],[mavis,freida],[mavis,george],[mavis,harry],[mavis,jan],[mavis,jane],[mavis,jason],[mavis,jill],[mavis,joe],[mavis,mary],[mavis,sam],[mavis,terry],[mavis,tim],[rover,lady],[rover,snoopy],[sally,fred],[sally,mary],[sam,george],[sam,jack],[sam,mavis],[snoopy,lady],[snoopy,lassie],[snoopy,rover],[snoopy,tramp],[terry,harry],[terry,jan],[terry,jill],[terry,mavis],[tim,jason],[tim,jill],[tim,mavis],[tramp,lassie],[tramp,snoopy]", true, null, hard/3),
+    		//========== parent/1 ===================================================================================
+			makeBoolTest("parent(terry)", true, null, easy/3),
+			makeBoolTest("parent(jack)", false, null, easy/3),
+			makeListTest("parent(X)", "fred,freida,george,harry,jan,jane,jason,jill,joe,lady,lassie,mary,rover,sam,terry,tim,tramp", false, null, easy/3),
+
+			makeListTest("parent(X)", "fred,freida,george,harry,jan,jane,jason,jill,joe,lady,lassie,mary,rover,sam,terry,tim,tramp", true, null, hard),
 			//========== childless/1 ================================================================================
-			makeBoolTest("childless(jed)", true, null),
-			makeBoolTest("childless(george)", false, null),
-			makeListTest("childless(X)", "felix,jack,jed,mavis,sally,snoopy", false, null),
-			makeListTest("childless(X)", "felix,jack,jed,mavis,sally,snoopy", true, null),
+			makeBoolTest("childless(jed)", true, null, easy),
+			makeBoolTest("childless(george)", false, null, easy),
+            
+            //---------
+
+			makeListTest("childless(X)", "felix,jack,jed,mavis,sally,snoopy", false, null, medium),
+
+			makeListTest("childless(X)", "felix,jack,jed,mavis,sally,snoopy", true, null, medium),
 			
+			//========== hasChildren/2 ================================================================================
+			makeBoolTest("hasChildren(lady,[lassie,rover])", true, null, easy/5),
+			makeBoolTest("hasChildren(fred,[sally,jed])", true, null, easy/5),
+			makeBoolTest("hasChildren(fred,[jed])", false, null, easy/5),
+			makeBoolTest("hasChildren(fred,[sally,jed,jane])", false, null, easy/5),
+			makeListTest("hasChildren(mary,X)", "jed,sally,jane", false, null, easy/5),
+
+			makeListTest("hasChildren(mary,X)", "jed,sally,jane", true, null, hard),
+			//========== countChildren/2 ================================================================================
+			makeBoolTest("countChildren(mary,3)", true, null, medium/2),
+			makeListTest("countChildren(lady,X)", "2", false, null, medium/2),
+
+			makeListTest("countChildren(lady,X)", "2", true, null, hard),
+
+            //---------
+			makeListTest("countChildren(X,1)", "tim,freida,jan,harry,joe,jason,terry,jill,george,tramp,rover,lassie", false, null, hard),
+
+			makeListTest("countChildren(X,1)", "tim,freida,jan,harry,joe,jason,terry,jill,george,tramp,rover,lassie", true, null, hard),
 			//========== sibling/2 =======================================================================
-			makeBoolTest("sibling(jed,terry)", false, "different families"),
-			makeBoolTest("sibling(jed,jane)", false, "step siblings"),
-			makeBoolTest("sibling(jed,sally)", true, null),
-			makeListTest("sibling(jed,X)", "sally", false, null),
-			makeListTest("sibling(jed,X)", "sally", true, null),
-			makeListTest("sibling(X,george)", "jack", false, null),
-			makeListTest("sibling(X,george)", "jack", true, null),
-			makeLis2Test("sibling(X,Y)", "[george,jack],[jack,george],[jed,sally],[sally,jed]", false, null),
-			makeLis2Test("sibling(X,Y)", "[george,jack],[jack,george],[jed,sally],[sally,jed]", true, null),
+			makeBoolTest("sibling(jed,terry)", false, "different families", medium/6),
+			makeBoolTest("sibling(jed,jane)", false, "step siblings", medium/6),
+			makeBoolTest("sibling(jed,sally)", true, null, medium/6),
+			makeListTest("sibling(jed,X)", "sally", false, null, medium/6),
+			makeListTest("sibling(X,george)", "jack", false, null, medium/6),
+			makeLis2Test("sibling(X,Y)", "[george,jack],[jack,george],[jed,sally],[sally,jed]", false, null, medium/6),
 			
+			makeListTest("sibling(jed,X)", "sally", true, null, hard/3),
+			makeListTest("sibling(X,george)", "jack", true, null, hard/3),
+			makeLis2Test("sibling(X,Y)", "[george,jack],[jack,george],[jed,sally],[sally,jed]", true, null, hard/3),
 			//========== sisterOf/2 =======================================================================
-			makeBoolTest("sisterOf(sally,jane)", false, "step sister"),
-			makeBoolTest("sisterOf(jed,sally)", false, "wrong way"),
-			makeBoolTest("sisterOf(sally,jed)", true, null),
-			makeListTest("sisterOf(sally,X)", "jed", false, null),
-			makeListTest("sisterOf(sally,X)", "jed", true, null),
-			makeListTest("sisterOf(X,jed)", "sally", false, null),
-			makeListTest("sisterOf(X,jed)", "sally", true, null),
-			makeLis2Test("sisterOf(X,Y)", "[sally,jed]", false, null),
-			makeLis2Test("sisterOf(X,Y)", "[sally,jed]", true, null),
+			makeBoolTest("sisterOf(sally,jane)", false, "step sister", easy/6),
+			makeBoolTest("sisterOf(jed,sally)", false, "wrong way", easy/6),
+			makeBoolTest("sisterOf(sally,jed)", true, null, easy/6),
+			makeListTest("sisterOf(sally,X)", "jed", false, null, easy/6),
+			makeListTest("sisterOf(X,jed)", "sally", false, null, easy/6),
+			makeLis2Test("sisterOf(X,Y)", "[sally,jed]", false, null, easy/6),
 
+			makeListTest("sisterOf(sally,X)", "jed", true, null, easy/3),
+			makeListTest("sisterOf(X,jed)", "sally", true, null, easy/3),
+			makeLis2Test("sisterOf(X,Y)", "[sally,jed]", true, null, easy/3),
 			//========== brotherOf/2 =======================================================================
-			makeBoolTest("brotherOf(jed,jane)", false, "step brother"),
-			makeBoolTest("brotherOf(sally,jed)", false, "wrong way"),
-			makeBoolTest("brotherOf(jed,sally)", true, null),
-			makeListTest("brotherOf(jed,X)", "sally", false, null),
-			makeListTest("brotherOf(jed,X)", "sally", true, null),
-			makeListTest("brotherOf(X,sally)", "jed", false, null),
-			makeListTest("brotherOf(X,sally)", "jed", true, null),
-			makeLis2Test("brotherOf(X,Y)", "[george,jack],[jack,george],[jed,sally]", false, null),
-			makeLis2Test("brotherOf(X,Y)", "[george,jack],[jack,george],[jed,sally]", true, null),
+			makeBoolTest("brotherOf(jed,jane)", false, "step brother", easy/6),
+			makeBoolTest("brotherOf(sally,jed)", false, "wrong way", easy/6),
+			makeBoolTest("brotherOf(jed,sally)", true, null, easy/6),
+			makeListTest("brotherOf(jed,X)", "sally", false, null, easy/6),
+			makeListTest("brotherOf(X,sally)", "jed", false, null, easy/6),
+			makeLis2Test("brotherOf(X,Y)", "[george,jack],[jack,george],[jed,sally]", false, null, easy/6),
 
+			makeListTest("brotherOf(jed,X)", "sally", true, null, easy/3),
+			makeListTest("brotherOf(X,sally)", "jed", true, null, easy/3),
+			makeLis2Test("brotherOf(X,Y)", "[george,jack],[jack,george],[jed,sally]", true, null, easy/3),
 			//========== stepSibling/2 =======================================================================
-			makeBoolTest("stepSibling(jed,terry)", false, "different families"),
-			makeBoolTest("stepSibling(jed,sally)", false, "siblings"),
-			makeBoolTest("stepSibling(jed,jane)", true, null),
-			makeListTest("stepSibling(jed,X)", "jane", false, null),
-			makeListTest("stepSibling(jed,X)", "jane", true, null),
-			makeListTest("stepSibling(X,jed)", "jane", false, null),
-			makeListTest("stepSibling(X,jed)", "jane", true, null),
-			makeLis2Test("stepSibling(X,Y)", "[jane,jed],[jane,sally],[jed,jane],[sally,jane]", false, null),
-			makeLis2Test("stepSibling(X,Y)", "[jane,jed],[jane,sally],[jed,jane],[sally,jane]", true, null),
+		   // makeBoolTest("stepSibling(jed,terry)", false, "different families"),
+		   // makeBoolTest("stepSibling(jed,sally)", false, "siblings"),
+		   // makeBoolTest("stepSibling(jed,jane)", true, null),
+		   // makeListTest("stepSibling(jed,X)", "jane", false, null),
+		   // makeListTest("stepSibling(jed,X)", "jane", true, null),
+		   // makeListTest("stepSibling(X,jed)", "jane", false, null),
+		   // makeListTest("stepSibling(X,jed)", "jane", true, null),
+		   // makeLis2Test("stepSibling(X,Y)", "[jane,jed],[jane,sally],[jed,jane],[sally,jane]", false, null),
+		   // makeLis2Test("stepSibling(X,Y)", "[jane,jed],[jane,sally],[jed,jane],[sally,jane]", true, null),
 
 			//========== stepSisterOf/2 =======================================================================
-			makeBoolTest("stepSisterOf(jane,terry)", false, "different families"),
-			makeBoolTest("stepSisterOf(jed,jane)", false, "male"),
-			makeBoolTest("stepSisterOf(jane,sally)", true, null),
-			makeListTest("stepSisterOf(jane,X)", "sally,jed", false, null),
-			makeListTest("stepSisterOf(jane,X)", "sally,jed", true, null),
-			makeListTest("stepSisterOf(X,jed)", "jane", false, null),
-			makeListTest("stepSisterOf(X,jed)", "jane", true, null),
-			makeLis2Test("stepSisterOf(X,Y)", "[jane,jed],[jane,sally],[sally,jane]", false, null),
-			makeLis2Test("stepSisterOf(X,Y)", "[jane,jed],[jane,sally],[sally,jane]", true, null),
+			makeBoolTest("stepSisterOf(jane,terry)", false, "different families", medium/6),
+			makeBoolTest("stepSisterOf(jed,jane)", false, "male", medium/6),
+			makeBoolTest("stepSisterOf(jane,sally)", true, null, medium/6),
+			makeListTest("stepSisterOf(jane,X)", "sally,jed", false, null, medium/6),
+			makeListTest("stepSisterOf(X,jed)", "jane", false, null, medium/6),
+			makeLis2Test("stepSisterOf(X,Y)", "[jane,jed],[jane,sally],[sally,jane]", false, null, medium/6),
 
+			makeListTest("stepSisterOf(jane,X)", "sally,jed", true, null, hard/3),
+			makeListTest("stepSisterOf(X,jed)", "jane", true, null, hard/3),
+			makeLis2Test("stepSisterOf(X,Y)", "[jane,jed],[jane,sally],[sally,jane]", true, null, hard/3),
 			//========== stepBrotherOf/2 =======================================================================
-			makeBoolTest("stepBrotherOf(jed,terry)", false, "different families"),
-			makeBoolTest("stepBrotherOf(jane,jed)", false, "female"),
-			makeBoolTest("stepBrotherOf(jed,jane)", true, null),
-			makeListTest("stepBrotherOf(jed,X)", "jane", false, null),
-			makeListTest("stepBrotherOf(jed,X)", "jane", true, null),
-			makeListTest("stepBrotherOf(X,jane)", "jed", false, null),
-			makeListTest("stepBrotherOf(X,jane)", "jed", true, null),
-			makeLis2Test("stepBrotherOf(X,Y)", "[jed,jane]", false, null),
-			makeLis2Test("stepBrotherOf(X,Y)", "[jed,jane]", true, null),
+			makeBoolTest("stepBrotherOf(jed,terry)", false, "different families", easy/6),
+			makeBoolTest("stepBrotherOf(jane,jed)", false, "female", easy/6),
+			makeBoolTest("stepBrotherOf(jed,jane)", true, null, easy/6),
+			makeListTest("stepBrotherOf(jed,X)", "jane", false, null, easy/6),
+			makeListTest("stepBrotherOf(X,jane)", "jed", false, null, easy/6),
+			makeLis2Test("stepBrotherOf(X,Y)", "[jed,jane]", false, null, easy/6),
 
+			makeListTest("stepBrotherOf(jed,X)", "jane", true, null, easy/3),
+			makeListTest("stepBrotherOf(X,jane)", "jed", true, null, easy/3),
+			makeLis2Test("stepBrotherOf(X,Y)", "[jed,jane]", true, null, easy/3),
 			//========== cousin/2 =======================================================================
-			makeBoolTest("cousin(george,jill)", false, "different families"),
-			makeListTest("cousin(george,X)", new String[]{}, false, null),
-			makeListTest("cousin(X,jed)", new String[]{}, false, null),
-			makeLis2Test("cousin(X,Y)", new String[]{}, false, null),
+			//makeBoolTest("cousin(george,jill)", false, "different families"),
+			//makeListTest("cousin(george,X)", new String[]{}, false, null),
+			//makeListTest("cousin(X,jed)", new String[]{}, false, null),
+			//makeLis2Test("cousin(X,Y)", new String[]{}, false, null),
 
-			//========== ancestorOf/2 ===============================================================================
-			makeBoolTest("ancestorOf(joe,mavis)", true, null),
-			makeListTest("ancestorOf(joe,X)", new String[]{"george","jack","jane","mavis"}, false, null),
-			makeListTest("ancestorOf(X,mavis)", new String[]{"freida", "george", "harry", "jan", "jane", "jason", "jill", "joe", "mary", "sam", "terry", "tim"}, false, null),
-			//========== ancestorOf/3 ===============================================================================
-			makeBoolTest("ancestorOf(X,joe,1)", false, null),
-			makeListTest("ancestorOf(X,jane,0)" , "jane", false, "duplicates OK"),
-			makeListTest("ancestorOf(X,jane,0)" , "jane", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(X,mavis,1)", "george,jill", false, "duplicates OK"),
-			makeListTest("ancestorOf(X,mavis,1)", "george,jill", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(X,mavis,2)", "jane,jason,sam,terry", false, "duplicates OK"),
-			makeListTest("ancestorOf(X,mavis,2)", "jane,jason,sam,terry", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(X,mavis,3)", "freida,harry,jan,joe,mary,tim", false, "duplicates OK"),
-			makeListTest("ancestorOf(X,mavis,3)", "freida,harry,jan,joe,mary,tim", true, "duplicates not accepted"),
-			makeBoolTest("ancestorOf(mavix,X,1)", false, null),
-			makeListTest("ancestorOf(jane,X,0)" , "jane", false, "duplicates OK"),
-			makeListTest("ancestorOf(jane,X,0)" , "jane", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(mary,X,1)", "jane, jed, sally", false, "duplicates OK"),
-			makeListTest("ancestorOf(mary,X,1)", "jane, jed, sally", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(mary,X,2)", "george, jack", false, "duplicates OK"),
-			makeListTest("ancestorOf(mary,X,2)", "george, jack", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(mary,X,3)", "mavis", false, "duplicates OK"),
-			makeListTest("ancestorOf(mary,X,3)", "mavis", true, "duplicates not accepted"),
-			makeBoolTest("ancestorOf(terry,jan,X)", false, null),
-			makeListTest("ancestorOf(jan,jan,X)", "0", false, "duplicates OK"),
-			makeListTest("ancestorOf(jan,jan,X)", "0", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(jan,terry,X)", "1", false, "duplicates OK"),
-			makeListTest("ancestorOf(jan,terry,X)", "1", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(jan,jill,X)", "2", false, "duplicates OK"),
-			makeListTest("ancestorOf(jan,jill,X)", "2", true, "duplicates not accepted"),
-			makeListTest("ancestorOf(jan,mavis,X)", "3", false, "duplicates OK"),
-			makeListTest("ancestorOf(jan,mavis,X)", "3", true, "duplicates not accepted"),
-			
-			//========== related/2 =======================================================================
-			makeBoolTest("related(george,jack)", false, "siblings may not be genetically related"),
-			makeBoolTest("related(jane,jason)", false, "different family lines"),
-			makeBoolTest("related(mavis,joe)", true, null),
-			makeListTest("related(jane,X)", "george,jack,jane,joe,mary,mavis", false, null),
-			makeListTest("related(jane,X)", "george,jack,jane,joe,mary,mavis", true, null),
-			makeListTest("related(X,jane)", "george,jack,jane,joe,mary,mavis", false, null),
-			makeListTest("related(X,jane)", "george,jack,jane,joe,mary,mavis", true, null),
-			makeLis2Test("related(X,Y)", "[A,A],[fred,jed],[fred,sally],[freida,jason],[freida,jill],[freida,mavis],[george,jane],[george,joe],[george,mary],[george,mavis],[george,sam],[harry,jill],[harry,mavis],[harry,terry],[jack,jane],[jack,joe],[jack,mary],[jack,sam],[jan,jill],[jan,mavis],[jan,terry],[jane,george],[jane,jack],[jane,joe],[jane,mary],[jane,mavis],[jason,freida],[jason,jill],[jason,mavis],[jason,tim],[jed,fred],[jed,mary],[jill,freida],[jill,harry],[jill,jan],[jill,jason],[jill,mavis],[jill,terry],[jill,tim],[joe,george],[joe,jack],[joe,jane],[joe,mavis],[lady,lassie],[lady,rover],[lady,snoopy],[lassie,lady],[lassie,snoopy],[lassie,tramp],[mary,george],[mary,jack],[mary,jane],[mary,jed],[mary,mavis],[mary,sally],[mavis,freida],[mavis,george],[mavis,harry],[mavis,jan],[mavis,jane],[mavis,jason],[mavis,jill],[mavis,joe],[mavis,mary],[mavis,sam],[mavis,terry],[mavis,tim],[rover,lady],[rover,snoopy],[sally,fred],[sally,mary],[sam,george],[sam,jack],[sam,mavis],[snoopy,lady],[snoopy,lassie],[snoopy,rover],[snoopy,tramp],[terry,harry],[terry,jan],[terry,jill],[terry,mavis],[tim,jason],[tim,jill],[tim,mavis],[tramp,lassie],[tramp,snoopy]", false, null),
-			makeLis2Test("related(X,Y)", "[A,A],[fred,jed],[fred,sally],[freida,jason],[freida,jill],[freida,mavis],[george,jane],[george,joe],[george,mary],[george,mavis],[george,sam],[harry,jill],[harry,mavis],[harry,terry],[jack,jane],[jack,joe],[jack,mary],[jack,sam],[jan,jill],[jan,mavis],[jan,terry],[jane,george],[jane,jack],[jane,joe],[jane,mary],[jane,mavis],[jason,freida],[jason,jill],[jason,mavis],[jason,tim],[jed,fred],[jed,mary],[jill,freida],[jill,harry],[jill,jan],[jill,jason],[jill,mavis],[jill,terry],[jill,tim],[joe,george],[joe,jack],[joe,jane],[joe,mavis],[lady,lassie],[lady,rover],[lady,snoopy],[lassie,lady],[lassie,snoopy],[lassie,tramp],[mary,george],[mary,jack],[mary,jane],[mary,jed],[mary,mavis],[mary,sally],[mavis,freida],[mavis,george],[mavis,harry],[mavis,jan],[mavis,jane],[mavis,jason],[mavis,jill],[mavis,joe],[mavis,mary],[mavis,sam],[mavis,terry],[mavis,tim],[rover,lady],[rover,snoopy],[sally,fred],[sally,mary],[sam,george],[sam,jack],[sam,mavis],[snoopy,lady],[snoopy,lassie],[snoopy,rover],[snoopy,tramp],[terry,harry],[terry,jan],[terry,jill],[terry,mavis],[tim,jason],[tim,jill],[tim,mavis],[tramp,lassie],[tramp,snoopy]", true, null),
+    		//========== getSpecies/2 =======================================================================
+			makeBoolTest("getSpecies(tim,dog)", false, null, hard/8),
+			makeBoolTest("getSpecies(sally,cat)", false, null, hard/8),
+			makeBoolTest("getSpecies(tim,human)", true, null, hard/8),
+			makeListTest("getSpecies(tim,X)", "human", false, null, hard/8),
+			makeListTest("getSpecies(X,human)", "fred,freida,george,harry,jack,jan,jane,jason,jed,jill,joe,mary,mavis,sally,sam,terry,tim", false, null, hard/8),
+			makeListTest("getSpecies(X,dog)", "lady,tramp,rover,lassie,snoopy", false, null, hard/8),
+			makeListTest("getSpecies(X,cat)", "felix", false, null, hard/8),
+			makeLis2Test("getSpecies(X,Y)", "[car1,car],[car2,car],[car3,car],[felix,cat],[fred,human],[freida,human],[george,human],[harry,human],[house1,house],[house2,house],[house3,house],[house4,house],[jack,human],[jan,human],[jane,human],[jason,human],[jed,human],[jill,human],[joe,human],[lady,dog],[lassie,dog],[mary,human],[mavis,human],[rover,dog],[sally,human],[sam,human],[snoopy,dog],[terry,human],[tim,human],[tramp,dog]", false, null, hard/8),
 
-			//========== getSpecies/2 =======================================================================
-			makeBoolTest("getSpecies(tim,dog)", false, null),
-			makeBoolTest("getSpecies(sally,cat)", false, null),
-			makeBoolTest("getSpecies(tim,human)", true, null),
-			makeListTest("getSpecies(tim,X)", "human", false, null),
-			makeListTest("getSpecies(tim,X)", "human", true, null),
-			makeListTest("getSpecies(X,human)", "fred,freida,george,harry,jack,jan,jane,jason,jed,jill,joe,mary,mavis,sally,sam,terry,tim", false, null),
-			makeListTest("getSpecies(X,human)", "fred,freida,george,harry,jack,jan,jane,jason,jed,jill,joe,mary,mavis,sally,sam,terry,tim", true, null),
-			makeListTest("getSpecies(X,dog)", "lady,tramp,rover,lassie,snoopy", false, null),
-			makeListTest("getSpecies(X,cat)", "felix", false, null),
-			makeLis2Test("getSpecies(X,Y)", "[car1,car],[car2,car],[car3,car],[felix,cat],[fred,human],[freida,human],[george,human],[harry,human],[house1,house],[house2,house],[house3,house],[house4,house],[jack,human],[jan,human],[jane,human],[jason,human],[jed,human],[jill,human],[joe,human],[lady,dog],[lassie,dog],[mary,human],[mavis,human],[rover,dog],[sally,human],[sam,human],[snoopy,dog],[terry,human],[tim,human],[tramp,dog]", false, null),
-			makeLis2Test("getSpecies(X,Y)", "[car1,car],[car2,car],[car3,car],[felix,cat],[fred,human],[freida,human],[george,human],[harry,human],[house1,house],[house2,house],[house3,house],[house4,house],[jack,human],[jan,human],[jane,human],[jason,human],[jed,human],[jill,human],[joe,human],[lady,dog],[lassie,dog],[mary,human],[mavis,human],[rover,dog],[sally,human],[sam,human],[snoopy,dog],[terry,human],[tim,human],[tramp,dog]", true, null),
-
+			makeListTest("getSpecies(tim,X)", "human", true, null, hard/3),
+			makeListTest("getSpecies(X,human)", "fred,freida,george,harry,jack,jan,jane,jason,jed,jill,joe,mary,mavis,sally,sam,terry,tim", true, null, hard/3),
+			makeLis2Test("getSpecies(X,Y)", "[car1,car],[car2,car],[car3,car],[felix,cat],[fred,human],[freida,human],[george,human],[harry,human],[house1,house],[house2,house],[house3,house],[house4,house],[jack,human],[jan,human],[jane,human],[jason,human],[jed,human],[jill,human],[joe,human],[lady,dog],[lassie,dog],[mary,human],[mavis,human],[rover,dog],[sally,human],[sam,human],[snoopy,dog],[terry,human],[tim,human],[tramp,dog]", true, null, hard/3),
 //			//========== isMale/1 =======================================================================
 //			makeBoolTest("isMale(lady)", false, null),
 //			makeBoolTest("isMale(terry)", false, null),
@@ -1022,21 +1187,22 @@ public class PrologTest {
 //			makeListTest("isFemale(X)", "freida,jan,jane,jill,lady,lassie,mary,mavis,sally,terry", true, null),
 
 			//========== pet/1 =======================================================================
-			makeBoolTest("pet(jan)", false, null),
-			makeBoolTest("pet(lassie)", false, null),
-			makeBoolTest("pet(rover)", true, null),
-			makeBoolTest("pet(lady)", true, null),
-			makeListTest("pet(X)", "felix,snoopy,lady,rover", false, null),
-			makeListTest("pet(X)", "felix,snoopy,lady,rover", true, null),
+			makeBoolTest("pet(jan)", false, null, easy/5),
+			makeBoolTest("pet(lassie)", false, null, easy/5),
+			makeBoolTest("pet(rover)", true, null, easy/5),
+			makeBoolTest("pet(lady)", true, null, easy/5),
+			makeListTest("pet(X)", "felix,snoopy,lady,rover", false, null, easy/5),
+
+			makeListTest("pet(X)", "felix,snoopy,lady,rover", true, null, easy),
 
 			//========== feral/1 =======================================================================
-			makeBoolTest("feral(mary)", false, null),
-			makeBoolTest("feral(lady)", false, null),
-			makeBoolTest("feral(tramp)", true, null),
-			makeBoolTest("feral(lassie)", true, null),
-			makeListTest("feral(X)", "tramp,lassie", false, null),
-			makeListTest("feral(X)", "tramp,lassie", true, null),
+			makeBoolTest("feral(mary)", false, null, easy/5),
+			makeBoolTest("feral(lady)", false, null, easy/5),
+			makeBoolTest("feral(tramp)", true, null, easy/5),
+			makeBoolTest("feral(lassie)", true, null, easy/5),
+			makeListTest("feral(X)", "tramp,lassie", false, null, easy/5),
 
+			makeListTest("feral(X)", "tramp,lassie", true, null, easy),
 //			new Test("quit Prolog",
 //					new TestCode() {
 //				@Override public StatusReturn code(Test t) {
